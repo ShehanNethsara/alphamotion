@@ -12,9 +12,18 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import '../../config/firebase.ts'; // ඔයාගේ firebase config path එක හරියට තියෙනවාද බලන්න
 import { StatusBar } from 'expo-status-bar';
+
+// Correct Import (Import වචනය එක පාරයි තියෙන්නේ)
+import { loginUser } from '../../services/authService';
+
+const COLORS = {
+  neon: '#CCFF00',
+  black: '#000000',
+  darkGray: '#1C1C1E',
+  textGray: '#666666',
+  white: '#FFFFFF',
+};
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -31,9 +40,9 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await loginUser(email, password); // Service එකෙන් login වෙනවා
       Alert.alert('Success', 'Welcome back!');
-      router.replace('/(tabs)'); // Login වුනාම Home (Tabs) එකට යවනවා
+      router.replace('/(dashboard)/home'); // Dashboard එකට යවනවා
     } catch (error: any) {
       Alert.alert('Login Failed', error.message);
     } finally {
@@ -49,33 +58,31 @@ export default function LoginScreen() {
       <StatusBar style="light" />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         
-        {/* 1. Header & Logo */}
+        {/* Header */}
         <View style={styles.header}>
-          {/* Logo එක වෙනුවට Icon එකක් */}
-          <Ionicons name="barbell" size={60} color="#CCFF00" /> 
+          <Ionicons name="barbell" size={60} color={COLORS.neon} />
           <Text style={styles.title}>Welcome Back</Text>
         </View>
 
-        {/* 2. Google Sign In Button (UI Only for Assignment) */}
+        {/* Google Button */}
         <TouchableOpacity style={styles.googleButton}>
           <Ionicons name="logo-google" size={20} color="#fff" style={{ marginRight: 10 }} />
           <Text style={styles.googleButtonText}>Sign up with Google</Text>
         </TouchableOpacity>
 
-        {/* Divider */}
         <View style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
           <Text style={styles.dividerText}>Or Sign In With</Text>
           <View style={styles.dividerLine} />
         </View>
 
-        {/* 3. Input Fields */}
+        {/* Inputs */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Email address</Text>
           <TextInput
             style={styles.input}
             placeholder="tanya.hill@example.com"
-            placeholderTextColor="#666"
+            placeholderTextColor={COLORS.textGray}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -87,7 +94,7 @@ export default function LoginScreen() {
             <TextInput
               style={styles.passwordInput}
               placeholder="*******"
-              placeholderTextColor="#666"
+              placeholderTextColor={COLORS.textGray}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -96,18 +103,17 @@ export default function LoginScreen() {
               <Ionicons 
                 name={showPassword ? "eye-off" : "eye"} 
                 size={20} 
-                color="#888" 
+                color={COLORS.textGray} 
               />
             </TouchableOpacity>
           </View>
           
-          {/* Forgot Password */}
           <TouchableOpacity style={{ alignSelf: 'flex-end', marginTop: 10 }}>
             <Text style={styles.forgotPassword}>Forgot password?</Text>
           </TouchableOpacity>
         </View>
 
-        {/* 4. Login Button */}
+        {/* Login Button */}
         <TouchableOpacity 
           style={styles.loginButton} 
           onPress={handleLogin}
@@ -118,11 +124,10 @@ export default function LoginScreen() {
           </Text>
         </TouchableOpacity>
 
-        {/* 5. Footer - Sign Up Link */}
+        {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an Account? </Text>
-          {/* තාම register screen එක හදලා නෑ, හැදුවම මේක වැඩ කරයි */}
-          <TouchableOpacity onPress={() => router.push('/register')}>
+          <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
             <Text style={styles.signupText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -135,7 +140,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: COLORS.black,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -149,7 +154,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: COLORS.white,
     marginTop: 10,
   },
   googleButton: {
@@ -164,7 +169,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.05)',
   },
   googleButtonText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 16,
     fontWeight: '500',
   },
@@ -179,7 +184,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
   },
   dividerText: {
-    color: '#666',
+    color: COLORS.textGray,
     paddingHorizontal: 10,
     fontSize: 14,
   },
@@ -187,14 +192,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 14,
     marginBottom: 8,
     marginLeft: 5,
   },
   input: {
-    backgroundColor: '#1C1C1E',
-    color: '#fff',
+    backgroundColor: COLORS.darkGray,
+    color: COLORS.white,
     padding: 15,
     borderRadius: 15,
     marginBottom: 20,
@@ -204,7 +209,7 @@ const styles = StyleSheet.create({
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.darkGray,
     borderRadius: 15,
     borderWidth: 1,
     borderColor: '#333',
@@ -212,15 +217,15 @@ const styles = StyleSheet.create({
   },
   passwordInput: {
     flex: 1,
-    color: '#fff',
+    color: COLORS.white,
     paddingVertical: 15,
   },
   forgotPassword: {
-    color: '#CCFF00', // Neon Green Color
+    color: COLORS.neon,
     fontSize: 14,
   },
   loginButton: {
-    backgroundColor: '#CCFF00',
+    backgroundColor: COLORS.neon,
     paddingVertical: 18,
     borderRadius: 30,
     alignItems: 'center',
@@ -229,7 +234,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   loginButtonText: {
-    color: '#000',
+    color: COLORS.black,
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -238,11 +243,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   footerText: {
-    color: '#888',
+    color: COLORS.textGray,
     fontSize: 14,
   },
   signupText: {
-    color: '#CCFF00',
+    color: COLORS.neon,
     fontWeight: 'bold',
     fontSize: 14,
   },

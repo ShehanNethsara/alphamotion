@@ -18,7 +18,7 @@ export default function WelcomeScreen() {
       <View style={styles.circleContainer}>
         <View style={styles.circle}>
           <Image
-            source={require('../assets/images/1.jpg')}
+            source={require('../../assets/images/1.jpg')}
             style={styles.image}
             resizeMode="cover" // රවුම සම්පූර්ණයෙන්ම වැහෙන්න 'cover' දැම්මා
           />
