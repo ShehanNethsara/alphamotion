@@ -13,8 +13,8 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import  '../../config/firebase'; // Path එක වෙනස් වුනා (../..)
 import { StatusBar } from 'expo-status-bar';
+import { auth } from '@/config/firebase';
 
 // Theme Colors
 const COLORS = {

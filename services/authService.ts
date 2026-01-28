@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth';
 
 // 👇 මේ import එක අනිවාර්යයෙන්ම තියෙන්න ඕන
-import  '../config/firebase'; 
+import { auth } from '../config/firebase';
 
 export const registerUser = async (name: string, email: string, password: string): Promise<User> => {
   try {
