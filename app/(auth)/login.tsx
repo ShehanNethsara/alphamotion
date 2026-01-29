@@ -42,7 +42,7 @@ export default function LoginScreen() {
     try {
       await loginUser(email, password); // Service එකෙන් login වෙනවා
       Alert.alert('Success', 'Welcome back!');
-      router.replace('/(dashboard)/home'); // Dashboard එකට යවනවා
+      router.replace('/(onboarding)/success'); // onboarding එකට යවනවා
     } catch (error: any) {
       Alert.alert('Login Failed', error.message);
     } finally {

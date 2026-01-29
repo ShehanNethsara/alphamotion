@@ -56,7 +56,7 @@ export default function RegisterScreen() {
       }
 
       Alert.alert('Success', 'Account created successfully!');
-      router.replace('/(dashboard)/home'); // කෙලින්ම Dashboard එකට යවනවා
+      router.replace('/(onboarding)/success'); 
     } catch (error: any) {
       Alert.alert('Registration Failed', error.message);
     } finally {
