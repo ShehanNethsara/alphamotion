@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { Redirect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import { useAuth } from '@/hooks/useAuth';
 
 const { width, height } = Dimensions.get('window');
 
@@ -18,7 +19,7 @@ export default function WelcomeScreen() {
       <View style={styles.circleContainer}>
         <View style={styles.circle}>
           <Image
-            source={require('../../assets/images/1.jpg')}
+            source={require('../assets/images/1.jpg')}
             style={styles.image}
             resizeMode="cover" // රවුම සම්පූර්ණයෙන්ම වැහෙන්න 'cover' දැම්මා
           />
@@ -137,3 +138,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+
+const Index = () => {
+  const { user, loading } = useAuth()
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-gray-50">
+        <ActivityIndicator size="large" color="#4ade80" />
+      </View>
+    )
+  }
+
+  if (user) {
+    return <Redirect href="/home" />
+  } else {
+    return <Redirect href="/login" />
+  }
+}
+
+// export default Index
