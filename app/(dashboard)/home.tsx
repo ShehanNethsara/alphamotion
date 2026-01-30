@@ -11,11 +11,11 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import { getAuth } from 'firebase/auth'; // 1. මෙය import කළා
 
 const { width } = Dimensions.get('window');
 
 // Mock Data (Workout List)
-// ඔයාගේ assets folder එකේ මේ පින්තූර තියෙනවද බලන්න (1.jpg, 3.jpg)
 const POPULAR_WORKOUTS = [
   { 
     id: '1', 
@@ -42,6 +42,11 @@ const POPULAR_WORKOUTS = [
 
 export default function HomeScreen() {
   const router = useRouter();
+  
+  // 2. Log වී සිටින User ගේ නම ලබා ගැනීම
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const displayName = user?.displayName || "User"; // නම නැත්නම් 'User' කියලා පෙන්වයි
 
   return (
     <View style={styles.container}>
@@ -53,7 +58,10 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Good Morning 👋</Text>
-            <Text style={styles.userName}>Tanya Hill</Text>
+            
+            {/* 3. මෙතන නම වෙනස් කළා */}
+            <Text style={styles.userName}>{displayName}</Text>
+          
           </View>
           <TouchableOpacity onPress={() => router.push('/(dashboard)/profile')}>
             <Image 
@@ -102,7 +110,7 @@ export default function HomeScreen() {
               <Ionicons name="play" size={16} color="black" style={{ marginLeft: 5 }} />
             </TouchableOpacity>
           </View>
-          {/* දුවන කෙනෙක්ගේ පින්තූරයක් මෙතනට දාන්න (4.jpg හෝ hero.png) */}
+          {/* දුවන කෙනෙක්ගේ පින්තූරයක් මෙතනට දාන්න */}
           <Image 
             source={require('../../assets/images/4.jpg')} 
             style={styles.heroImage}
@@ -230,7 +238,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 30,
-    overflow: 'hidden', // පින්තූරේ එළියට යන එක නවත්තන්න
+    overflow: 'hidden',
   },
   heroTextContainer: {
     flex: 1,
@@ -263,7 +271,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -10,
     bottom: -10,
-    transform: [{ rotate: '-10deg' }] // පොඩි design effect එකක්
+    transform: [{ rotate: '-10deg' }]
   },
 
   // 4. Popular Workouts Styles

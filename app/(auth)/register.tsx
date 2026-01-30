@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'; // updateProfile import කළා
 import { StatusBar } from 'expo-status-bar';
 import { auth } from '@/config/firebase';
 
@@ -35,6 +35,7 @@ export default function RegisterScreen() {
   const [agreeTerms, setAgreeTerms] = useState(false);
 
   const handleRegister = async () => {
+    // 1. Validation Check
     if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
@@ -47,16 +48,23 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      // 1. Firebase User හැදීම
+      // 2. Firebase Account එක හදනවා
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      // 2. නම Update කිරීම
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, { displayName: name });
-      }
+      const user = userCredential.user;
+
+      // 3. නම (Display Name) Update කරනවා (වැදගත්ම කොටස)
+      await updateProfile(user, {
+        displayName: name
+      });
+
+      console.log('User created and name updated:', name);
 
       Alert.alert('Success', 'Account created successfully!');
+      
+      // 4. සාර්ථක වූ පසු ඊළඟ පිටුවට යවනවා
+      // (ඔයාට කෙලින්ම Home යවන්න ඕන නම් '/(dashboard)/home' දාන්න)
       router.replace('/(onboarding)/success'); 
+      
     } catch (error: any) {
       Alert.alert('Registration Failed', error.message);
     } finally {
@@ -132,7 +140,7 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Password Strength Indicator (Visual Only as per Design) */}
+          {/* Password Strength Indicator */}
           <View style={styles.strengthContainer}>
             <View style={[styles.strengthBar, { backgroundColor: password.length > 0 ? COLORS.neon : '#333' }]} />
             <View style={[styles.strengthBar, { backgroundColor: password.length > 6 ? COLORS.neon : '#333' }]} />
