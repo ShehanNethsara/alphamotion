@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   View, 
   Text, 
@@ -6,36 +6,39 @@ import {
   TouchableOpacity, 
   ScrollView, 
   ImageBackground, 
-  TextInput 
+  TextInput,
+  Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-
-const COLORS = {
-  primary: '#CCFF00', // Neon Green
-  background: '#000000',
-  card: '#1C1C1E',
-  text: '#FFFFFF',
-  gray: '#888888',
-};
+import COLORS from '../../constants/Colors';
+//   primary: '#CCFF00', 
+//   background: '#000000',
+//   card: '#1C1C1E',
+//   text: '#FFFFFF',
+//   gray: '#888888',
+// };
 
 const CATEGORIES = ['All', 'Strength', 'Cardio', 'Yoga', 'HIIT', 'Pilates'];
 
+// Workouts Data
 const WORKOUT_PLANS = [
   {
     id: '1',
     title: 'Upper Body Power',
     level: 'Advanced',
     duration: '45 Min',
+    kcal: '400',
     image: require('../../assets/images/1.jpg'),
-    category: 'Strength' // Category එකත් දැම්මා (Filter කරන්න ලෙසි වෙන්න)
+    category: 'Strength'
   },
   {
     id: '2',
     title: 'Leg Day Shred',
     level: 'Intermediate',
     duration: '30 Min',
+    kcal: '350',
     image: require('../../assets/images/3.jpg'),
     category: 'Strength'
   },
@@ -44,6 +47,7 @@ const WORKOUT_PLANS = [
     title: 'Morning Yoga Flow',
     level: 'Beginner',
     duration: '20 Min',
+    kcal: '150',
     image: require('../../assets/images/4.jpg'),
     category: 'Yoga'
   },
@@ -52,8 +56,45 @@ const WORKOUT_PLANS = [
     title: 'HIIT Cardio Blast',
     level: 'Advanced',
     duration: '25 Min',
-    image: require('../../assets/images/1.jpg'), // ඔයා ළඟ තියෙන වෙන පින්තූරයක් දාන්න
+    kcal: '500',
+    image: require('../../assets/images/1.jpg'),
     category: 'HIIT'
+  },
+  {
+    id: '5',
+    title: 'Core Crusher Abs',
+    level: 'Intermediate',
+    duration: '15 Min',
+    kcal: '200',
+    image: require('../../assets/images/3.jpg'),
+    category: 'Strength'
+  },
+  {
+    id: '6',
+    title: 'Pilates for Back',
+    level: 'Beginner',
+    duration: '20 Min',
+    kcal: '180',
+    image: require('../../assets/images/4.jpg'),
+    category: 'Pilates'
+  },
+  {
+    id: '7',
+    title: 'Full Body Burn',
+    level: 'Advanced',
+    duration: '40 Min',
+    kcal: '450',
+    image: require('../../assets/images/1.jpg'),
+    category: 'Cardio'
+  },
+  {
+    id: '8',
+    title: 'Sleepy Time Yoga',
+    level: 'Beginner',
+    duration: '10 Min',
+    kcal: '80',
+    image: require('../../assets/images/4.jpg'),
+    category: 'Yoga'
   },
 ];
 
@@ -62,15 +103,17 @@ export default function TrainScreen() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchText, setSearchText] = useState('');
 
-  // 👇 Search සහ Category Filter Logic එක මෙතන
+  // 👇 DAILY CHALLENGE LOGIC 
+  const dailyChallenge = useMemo(() => {
+    const today = new Date().getDate();
+    const index = today % WORKOUT_PLANS.length;
+    return WORKOUT_PLANS[index];
+  }, []);
+
+  // 👇 Search & Filter Logic
   const filteredPlans = WORKOUT_PLANS.filter((plan) => {
-    // 1. Search එකට ගැලපෙනවද බලනවා (Case Insensitive)
     const matchesSearch = plan.title.toLowerCase().includes(searchText.toLowerCase());
-
-    // 2. Category එකට ගැලපෙනවද බලනවා
     const matchesCategory = selectedCategory === 'All' || plan.category === selectedCategory;
-
-    // දෙකම හරි නම් විතරක් පෙන්නනවා
     return matchesSearch && matchesCategory;
   });
 
@@ -78,21 +121,19 @@ export default function TrainScreen() {
     <View style={styles.container}>
       <StatusBar style="light" />
 
-      {/* Header & Search */}
+      {/* 1. Header & Search Bar */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Find a Workout</Text>
         
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color={COLORS.gray} />
-          {/* Search Input */}
           <TextInput 
             style={styles.searchInput}
             placeholder="Search workout..."
             placeholderTextColor={COLORS.gray}
             value={searchText}
-            onChangeText={(text) => setSearchText(text)} // Type කරන දේ State එකට යවනවා
+            onChangeText={setSearchText}
           />
-          {/* Clear Button (X) - Type කරලා තියෙනවා නම් විතරක් පෙන්නනවා */}
           {searchText.length > 0 && (
             <TouchableOpacity onPress={() => setSearchText('')}>
                <Ionicons name="close-circle" size={20} color={COLORS.gray} />
@@ -103,7 +144,7 @@ export default function TrainScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* Categories */}
+        {/* 2. Categories */}
         <View style={styles.categoriesContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {CATEGORIES.map((cat, index) => (
@@ -126,57 +167,66 @@ export default function TrainScreen() {
           </ScrollView>
         </View>
 
-        {/* Daily Challenge (මේක හැමවෙලේම පේන්න තියමු) */}
+         {/* 3. Daily Challenge (Dynamic)  */}
         {searchText === '' && selectedCategory === 'All' && (
-          <>
+          <View>
             <Text style={styles.sectionTitle}>Daily Challenge</Text>
             <TouchableOpacity 
               activeOpacity={0.9} 
-              // onPress={() => router.push('/(dashboard)/workout-active')}
+              onPress={() => router.push({
+                pathname: '/(dashboard)/workout-active',
+                params: { id: dailyChallenge.id, title: dailyChallenge.title }
+              })}
             >
               <ImageBackground
-                source={require('../../assets/images/4.jpg')}
+                source={dailyChallenge.image} 
                 style={styles.featuredCard}
                 imageStyle={{ borderRadius: 20 }}
               >
                 <View style={styles.featuredOverlay}>
                   <View style={styles.challengeBadge}>
                     <Ionicons name="flame" size={14} color="#000" />
-                    <Text style={styles.challengeText}>Burn 500 Kcal</Text>
+                    <Text style={styles.challengeText}>Burn {dailyChallenge.kcal} Kcal</Text>
                   </View>
                   <View>
-                    <Text style={styles.featuredTitle}>High Intensity HIIT</Text>
-                    <Text style={styles.featuredSubtitle}>45 Minutes • Advanced</Text>
+
+                    <Text style={styles.featuredTitle}>{dailyChallenge.title}</Text>
+                    <Text style={styles.featuredSubtitle}>{dailyChallenge.duration} • {dailyChallenge.level}</Text>
                   </View>
-                  <TouchableOpacity style={styles.startButton}>
+                  
+                  <View style={styles.startButton}>
                     <Text style={styles.startButtonText}>Start</Text>
-                  </TouchableOpacity>
+                  </View>
                 </View>
               </ImageBackground>
             </TouchableOpacity>
-          </>
+          </View>
         )}
 
-        {/* Explore Plans List */}
+        {/* 4. Filtered Workout List */}
         <Text style={styles.sectionTitle}>
           {searchText ? 'Search Results' : 'Explore Plans'}
         </Text>
         
-        {/* 👇 මෙතන WORKOUT_PLANS වෙනුවට filteredPlans පාවිච්චි කරන්න */}
         {filteredPlans.length > 0 ? (
           filteredPlans.map((item) => (
             <TouchableOpacity 
               key={item.id} 
               style={styles.planCard}
-              // onPress={() => router.push('/(dashboard)/workout-active')}
+              onPress={() => router.push({
+                pathname: '/(dashboard)/workout-active',
+                params: { id: item.id, title: item.title }
+              })}
             >
-              <ImageBackground 
+              <Image 
                 source={item.image} 
                 style={styles.planImage} 
-                imageStyle={{ borderTopLeftRadius: 15, borderBottomLeftRadius: 15 }}
+                resizeMode="cover"
               />
+              
               <View style={styles.planDetails}>
                 <Text style={styles.planTitle}>{item.title}</Text>
+                
                 <View style={styles.planMetaContainer}>
                   <View style={styles.planMeta}>
                     <Ionicons name="time-outline" size={14} color={COLORS.primary} />
@@ -186,17 +236,21 @@ export default function TrainScreen() {
                     <Ionicons name="barbell-outline" size={14} color={COLORS.primary} />
                     <Text style={styles.metaText}>{item.level}</Text>
                   </View>
+                  <View style={styles.planMeta}>
+                    <Text style={[styles.metaText, {color: COLORS.primary}]}>{item.category}</Text>
+                  </View>
                 </View>
               </View>
+
               <View style={styles.arrowButton}>
                  <Ionicons name="chevron-forward" size={20} color="#000" />
               </View>
             </TouchableOpacity>
           ))
         ) : (
-          // Search කරාම මුකුත් නැත්නම් පෙන්නන මැසේජ් එක
-          <View style={{ alignItems: 'center', marginTop: 20 }}>
-            <Text style={{ color: COLORS.gray }}>No workouts found.</Text>
+          <View style={styles.emptyState}>
+            <Ionicons name="search-outline" size={50} color={COLORS.gray} />
+            <Text style={styles.emptyText}>No workouts found</Text>
           </View>
         )}
 
@@ -236,8 +290,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   scrollContent: {
-    paddingBottom: 100, 
+    paddingBottom: 100, // Bottom Tab එකට ඉඩ
   },
+  
+  // Categories
   categoriesContainer: {
     marginBottom: 25,
     paddingLeft: 20,
@@ -263,6 +319,8 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: 'bold',
   },
+
+  // Titles
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -270,6 +328,8 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginBottom: 15,
   },
+
+  // Featured Card
   featuredCard: {
     marginHorizontal: 20,
     height: 200,
@@ -322,6 +382,8 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: 'bold',
   },
+
+  // Plan Cards
   planCard: {
     flexDirection: 'row',
     backgroundColor: COLORS.card,
@@ -329,11 +391,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderRadius: 15,
     alignItems: 'center',
-    paddingRight: 15,
+    padding: 10,
   },
   planImage: {
     width: 80,
     height: 80,
+    borderRadius: 10,
     marginRight: 15,
   },
   planDetails: {
@@ -349,6 +412,7 @@ const styles = StyleSheet.create({
   planMetaContainer: {
     flexDirection: 'row',
     gap: 15,
+    flexWrap: 'wrap',
   },
   planMeta: {
     flexDirection: 'row',
@@ -367,4 +431,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  
+  // Empty State
+  emptyState: {
+    alignItems: 'center',
+    marginTop: 50,
+    opacity: 0.5,
+  },
+  emptyText: {
+    color: COLORS.gray,
+    marginTop: 10,
+    fontSize: 16,
+  }
 });

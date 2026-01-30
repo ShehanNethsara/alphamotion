@@ -14,16 +14,9 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 
-// Correct Import (Import වචනය එක පාරයි තියෙන්නේ)
+// Correct Import
 import { loginUser } from '../../services/authService';
-
-const COLORS = {
-  neon: '#CCFF00',
-  black: '#000000',
-  darkGray: '#1C1C1E',
-  textGray: '#666666',
-  white: '#FFFFFF',
-};
+import COLORS from '../../constants/Colors'; 
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -40,9 +33,9 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      await loginUser(email, password); // Service එකෙන් login වෙනවා
+      await loginUser(email, password);
       Alert.alert('Success', 'Welcome back!');
-      router.replace('/(onboarding)/success'); // onboarding එකට යවනවා
+      router.replace('/(onboarding)/success');
     } catch (error: any) {
       Alert.alert('Login Failed', error.message);
     } finally {
@@ -60,7 +53,8 @@ export default function LoginScreen() {
         
         {/* Header */}
         <View style={styles.header}>
-          <Ionicons name="barbell" size={60} color={COLORS.neon} />
+          {/* COLORS.neon වෙනුවට COLORS.primary භාවිතා කළා */}
+          <Ionicons name="barbell" size={60} color={COLORS.primary} />
           <Text style={styles.title}>Welcome Back</Text>
         </View>
 
@@ -72,6 +66,7 @@ export default function LoginScreen() {
 
         <View style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
+          {/* COLORS.textGray වෙනුවට COLORS.gray භාවිතා කළා */}
           <Text style={styles.dividerText}>Or Sign In With</Text>
           <View style={styles.dividerLine} />
         </View>
@@ -82,7 +77,7 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             placeholder="tanya.hill@example.com"
-            placeholderTextColor={COLORS.textGray}
+            placeholderTextColor={COLORS.gray}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -94,7 +89,7 @@ export default function LoginScreen() {
             <TextInput
               style={styles.passwordInput}
               placeholder="*******"
-              placeholderTextColor={COLORS.textGray}
+              placeholderTextColor={COLORS.gray}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -103,7 +98,7 @@ export default function LoginScreen() {
               <Ionicons 
                 name={showPassword ? "eye-off" : "eye"} 
                 size={20} 
-                color={COLORS.textGray} 
+                color={COLORS.gray} 
               />
             </TouchableOpacity>
           </View>
@@ -140,7 +135,8 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.black,
+    // COLORS.black වෙනුවට COLORS.background භාවිතා කළා
+    backgroundColor: COLORS.background,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -154,7 +150,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.white,
+    // COLORS.white වෙනුවට COLORS.text භාවිතා කළා
+    color: COLORS.text,
     marginTop: 10,
   },
   googleButton: {
@@ -169,7 +166,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.05)',
   },
   googleButtonText: {
-    color: COLORS.white,
+    color: COLORS.text,
     fontSize: 16,
     fontWeight: '500',
   },
@@ -184,7 +181,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
   },
   dividerText: {
-    color: COLORS.textGray,
+    color: COLORS.gray,
     paddingHorizontal: 10,
     fontSize: 14,
   },
@@ -192,14 +189,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    color: COLORS.white,
+    color: COLORS.text,
     fontSize: 14,
     marginBottom: 8,
     marginLeft: 5,
   },
   input: {
-    backgroundColor: COLORS.darkGray,
-    color: COLORS.white,
+    // COLORS.darkGray වෙනුවට COLORS.card භාවිතා කළා
+    backgroundColor: COLORS.card,
+    color: COLORS.text,
     padding: 15,
     borderRadius: 15,
     marginBottom: 20,
@@ -209,7 +207,7 @@ const styles = StyleSheet.create({
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.darkGray,
+    backgroundColor: COLORS.card,
     borderRadius: 15,
     borderWidth: 1,
     borderColor: '#333',
@@ -217,15 +215,15 @@ const styles = StyleSheet.create({
   },
   passwordInput: {
     flex: 1,
-    color: COLORS.white,
+    color: COLORS.text,
     paddingVertical: 15,
   },
   forgotPassword: {
-    color: COLORS.neon,
+    color: COLORS.primary,
     fontSize: 14,
   },
   loginButton: {
-    backgroundColor: COLORS.neon,
+    backgroundColor: COLORS.primary,
     paddingVertical: 18,
     borderRadius: 30,
     alignItems: 'center',
@@ -234,7 +232,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   loginButtonText: {
-    color: COLORS.black,
+    color: '#000',
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -243,11 +241,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   footerText: {
-    color: COLORS.textGray,
+    color: COLORS.gray,
     fontSize: 14,
   },
   signupText: {
-    color: COLORS.neon,
+    color: COLORS.primary,
     fontWeight: 'bold',
     fontSize: 14,
   },
