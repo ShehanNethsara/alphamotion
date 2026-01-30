@@ -11,7 +11,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { getAuth } from 'firebase/auth'; // 1. මෙය import කළා
+import { getAuth } from 'firebase/auth';
 
 const { width } = Dimensions.get('window');
 
@@ -43,10 +43,31 @@ const POPULAR_WORKOUTS = [
 export default function HomeScreen() {
   const router = useRouter();
   
-  // 2. Log වී සිටින User ගේ නම ලබා ගැනීම
+  // User Data
   const auth = getAuth();
   const user = auth.currentUser;
-  const displayName = user?.displayName || "User"; // නම නැත්නම් 'User' කියලා පෙන්වයි
+  const displayName = user?.displayName || "User";
+
+  // --- WEEKLY GOAL & STATS DATA ---
+  const weeklyTarget = 5; 
+  const completedDays = 3; // <-- මෙතන අගය වෙනස් වුනාම, යට තියෙන Stats ඔක්කොම මාරු වෙනවා
+  const progressPercent = (completedDays / weeklyTarget) * 100;
+
+  // 👇 DYNAMIC CALCULATIONS (වෙනස් වන කොටස)
+  // එක දවසකට කැලරි 320ක් සහ විනාඩි 45ක් වැය වෙනවා කියලා උපකල්පනය කරමු
+  const totalCalories = completedDays * 320; 
+  const totalMinutes = completedDays * 45;
+  const avgHeartRate = completedDays > 0 ? 125 : 0; // ව්‍යායාම කරලා නම් විතරක් Heart Rate පෙන්වන්න
+
+  const weekDays = [
+    { label: 'M', done: true },
+    { label: 'T', done: true },
+    { label: 'W', done: false },
+    { label: 'T', done: true },
+    { label: 'F', done: false },
+    { label: 'S', done: false },
+    { label: 'S', done: false },
+  ];
 
   return (
     <View style={styles.container}>
@@ -54,30 +75,28 @@ export default function HomeScreen() {
       
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* 1. HEADER SECTION (Greeting & Profile) */}
+        {/* 1. HEADER SECTION */}
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Good Morning 👋</Text>
-            
-            {/* 3. මෙතන නම වෙනස් කළා */}
             <Text style={styles.userName}>{displayName}</Text>
-          
           </View>
           <TouchableOpacity onPress={() => router.push('/(dashboard)/profile')}>
             <Image 
-              source={require('../../assets/images/1.jpg')} // Profile Picture
+              source={require('../../assets/images/1.jpg')} 
               style={styles.profileImage} 
             />
           </TouchableOpacity>
         </View>
 
-        {/* 2. STATS BAR (Calories, Time, Heart Rate) */}
+        {/* 2. STATS BAR (Dynamic Values) */}
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
             <View style={styles.iconCircle}>
                 <Ionicons name="flame" size={20} color="#CCFF00" />
             </View>
-            <Text style={styles.statValue}>820</Text>
+            {/* මෙතන වෙනස් කළා: totalCalories */}
+            <Text style={styles.statValue}>{totalCalories}</Text>
             <Text style={styles.statLabel}>Kcal</Text>
           </View>
           <View style={styles.divider} />
@@ -85,7 +104,8 @@ export default function HomeScreen() {
             <View style={styles.iconCircle}>
                 <Ionicons name="time" size={20} color="#CCFF00" />
             </View>
-            <Text style={styles.statValue}>50</Text>
+            {/* මෙතන වෙනස් කළා: totalMinutes */}
+            <Text style={styles.statValue}>{totalMinutes}</Text>
             <Text style={styles.statLabel}>Mins</Text>
           </View>
           <View style={styles.divider} />
@@ -93,12 +113,43 @@ export default function HomeScreen() {
             <View style={styles.iconCircle}>
                 <Ionicons name="heart" size={20} color="#CCFF00" />
             </View>
-            <Text style={styles.statValue}>110</Text>
+            {/* මෙතන වෙනස් කළා: avgHeartRate */}
+            <Text style={styles.statValue}>{avgHeartRate}</Text>
             <Text style={styles.statLabel}>Bpm</Text>
           </View>
         </View>
 
-        {/* 3. HERO SECTION ("Ready to Workout?") */}
+        {/* --- WEEKLY GOAL PROGRESS --- */}
+        <View style={styles.goalCard}>
+          <View style={styles.goalHeader}>
+            <Text style={styles.goalTitle}>Weekly Goal</Text>
+            <Text style={styles.goalSubtitle}>{completedDays} of {weeklyTarget} Workouts</Text>
+          </View>
+
+          {/* Progress Bar */}
+          <View style={styles.progressBarBg}>
+            <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
+          </View>
+
+          {/* Days Indicator */}
+          <View style={styles.daysContainer}>
+            {weekDays.map((day, index) => (
+              <View key={index} style={styles.dayWrapper}>
+                <View style={[
+                  styles.dayCircle, 
+                  day.done && styles.dayCircleActive
+                ]}>
+                  <Text style={[
+                    styles.dayText, 
+                    day.done && styles.dayTextActive
+                  ]}>{day.label}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* 3. HERO SECTION */}
         <View style={styles.heroCard}>
           <View style={styles.heroTextContainer}>
             <Text style={styles.heroTitle}>Ready to {'\n'}Workout?</Text>
@@ -110,7 +161,6 @@ export default function HomeScreen() {
               <Ionicons name="play" size={16} color="black" style={{ marginLeft: 5 }} />
             </TouchableOpacity>
           </View>
-          {/* දුවන කෙනෙක්ගේ පින්තූරයක් මෙතනට දාන්න */}
           <Image 
             source={require('../../assets/images/4.jpg')} 
             style={styles.heroImage}
@@ -165,7 +215,7 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   
-  // 1. Header Styles
+  // Header Styles
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -190,11 +240,11 @@ const styles = StyleSheet.create({
     borderColor: '#CCFF00',
   },
 
-  // 2. Stats Styles
+  // Stats Styles
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#1C1C1E', // Dark Gray Box
+    backgroundColor: '#1C1C1E', 
     paddingVertical: 15,
     paddingHorizontal: 10,
     borderRadius: 20,
@@ -207,7 +257,7 @@ const styles = StyleSheet.create({
   iconCircle: {
       width: 40,
       height: 40,
-      backgroundColor: 'rgba(204, 255, 0, 0.1)', // Neon low opacity background
+      backgroundColor: 'rgba(204, 255, 0, 0.1)', 
       borderRadius: 20,
       justifyContent: 'center',
       alignItems: 'center',
@@ -229,9 +279,74 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  // 3. Hero Section Styles
+  // Weekly Goal Styles
+  goalCard: {
+    backgroundColor: '#1C1C1E',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 25,
+  },
+  goalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  goalTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  goalSubtitle: {
+    color: '#CCFF00', 
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  progressBarBg: {
+    height: 10,
+    backgroundColor: '#333',
+    borderRadius: 5,
+    marginBottom: 20,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#CCFF00', 
+    borderRadius: 5,
+  },
+  daysContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  dayWrapper: {
+    alignItems: 'center',
+  },
+  dayCircle: {
+    width: 35,
+    height: 35,
+    borderRadius: 17.5,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#555',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dayCircleActive: {
+    backgroundColor: '#CCFF00', 
+    borderColor: '#CCFF00',
+  },
+  dayText: {
+    color: '#888',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  dayTextActive: {
+    color: '#000', 
+  },
+
+  // Hero Section Styles
   heroCard: {
-    backgroundColor: '#CCFF00', // Neon Background
+    backgroundColor: '#CCFF00', 
     borderRadius: 25,
     padding: 20,
     height: 160,
@@ -274,7 +389,7 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-10deg' }]
   },
 
-  // 4. Popular Workouts Styles
+  // Popular Workouts Styles
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -291,11 +406,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   horizontalList: {
-    marginHorizontal: -20, // Screen එකේ කෙලවරටම යවන්න
+    marginHorizontal: -20, 
     paddingHorizontal: 20,
   },
   workoutCard: {
-    width: width * 0.5, // Screen එකෙන් 50% මහත
+    width: width * 0.5, 
     backgroundColor: '#1C1C1E',
     borderRadius: 20,
     marginRight: 15,
