@@ -1,6 +1,5 @@
-import { initializeApp } from "firebase/app";
-// getReactNativePersistence තාවකාලිකව අයින් කළා
-import { getAuth } from "firebase/auth"; 
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -12,10 +11,12 @@ const firebaseConfig = {
   appId: "1:1075532231715:web:2ff06c7838798216d36d96"
 };
 
-const app = initializeApp(firebaseConfig);
+let app;
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
+}
 
-const auth = getAuth(app);
-
-const db = getFirestore(app);
-
-export { auth, db };
+export const auth = getAuth(app);
+export const db = getFirestore(app);

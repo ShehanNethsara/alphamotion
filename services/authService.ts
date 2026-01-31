@@ -2,41 +2,48 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut, 
-  updateProfile,
-  User 
+  updateProfile 
 } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore'; 
+import { auth, db } from '../config/firebase'; 
 
-// 👇 මේ import එක අනිවාර්යයෙන්ම තියෙන්න ඕන
-import { auth } from '../config/firebase';
-
-export const registerUser = async (name: string, email: string, password: string): Promise<User> => {
+// 1. Register User
+export const registerUser = async (email: string, pass: string, name: string) => {
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    console.log("1. Starting Registration..."); // පියවර 1
 
-    if (user) {
-      await updateProfile(user, { displayName: name });
-    }
+    // A. Auth Create
+    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+    const user = userCredential.user;
+    console.log("2. Auth User Created:", user.uid); // පියවර 2
+
+    // B. Profile Update
+    await updateProfile(user, { displayName: name });
+    console.log("3. Profile Name Updated"); // පියවර 3
+
+    // C. Database Save
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      name: name,
+      email: email,
+      createdAt: new Date().toISOString()
+    });
+    console.log("4. Database Saved Successfully!"); // පියවර 4
 
     return user;
+
   } catch (error: any) {
-    throw new Error(error.message || 'Registration failed');
+    console.error("REGISTRATION FAILED AT:", error.code, error.message);
+    throw error; // UI එකට Error එක යවනවා
   }
 };
 
-export const loginUser = async (email: string, password: string): Promise<User> => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
-  } catch (error: any) {
-    throw new Error(error.message || 'Login failed');
-  }
+// ... loginUser සහ logoutUser පරණ විදිහටම තියන්න ...
+export const loginUser = async (email: string, pass: string) => {
+  const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+  return userCredential.user;
 };
 
-export const logoutUser = async (): Promise<void> => {
-  try {
-    await signOut(auth);
-  } catch (error: any) {
-    throw new Error(error.message || 'Logout failed');
-  }
+export const logoutUser = async () => {
+  await signOut(auth);
 };
