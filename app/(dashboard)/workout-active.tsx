@@ -7,19 +7,40 @@ import {
   TouchableOpacity, 
   ScrollView, 
   Dimensions,
-  Alert
+  Alert,
+  ImageSourcePropType,
+  ActivityIndicator
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import { getAuth } from 'firebase/auth'; 
+
 import COLORS from '../../constants/Colors';
+import { logCompletedWorkout } from '../../services/workoutService';
 
 const { height } = Dimensions.get('window');
 
+// --- Types ---
+interface Step {
+  id: string;
+  title: string;
+  time: number;
+}
 
-const WORKOUT_DATA: any = {
+interface Workout {
+  image: ImageSourcePropType;
+  description: string;
+  kcal: string;
+  time: string;
+  level: string;
+  steps: Step[];
+}
+
+// --- Data ---
+const WORKOUT_DATA: Record<string, Workout> = {
   '1': {
-    image: require('../../assets/images/9.jpg'),
+    image: require('../../assets/images/9.jpg'), 
     description: "Build upper body strength with this intensive power routine.",
     kcal: "320",
     time: "45 Mins",
@@ -66,56 +87,8 @@ const WORKOUT_DATA: any = {
       { id: '3', title: 'Plank', time: 10 },
     ]
   },
-    '5': {
-    image: require('../../assets/images/13.jpg'),
-    description: "A high-intensity full body cardio session designed to torch calories and boost your endurance limits.",   
-    kcal: "500",
-    time: "25 Mins",
-    level: "Advanced",
-    steps: [
-      { id: '1', title: 'Jumping Jacks', time: 10 },
-      { id: '2', title: 'Burpees', time: 10 },
-      { id: '3', title: 'Plank', time: 10 },
-    ]
-  },
-    '6': {
-    image: require('../../assets/images/114.jpg'),
-    description: "Improve your posture and strengthen your back muscles with these gentle but effective Pilates movements.",
-    kcal: "500",
-    time: "25 Mins",
-    level: "Advanced",
-    steps: [
-      { id: '1', title: 'Jumping Jacks', time: 10 },
-      { id: '2', title: 'Burpees', time: 10 },
-      { id: '3', title: 'Plank', time: 10 },
-    ]
-  },
-    '7': {
-    image: require('../../assets/images/15.jpg'),
-    description: "A high-intensity full body cardio session designed to torch calories and boost your endurance limits.",
-    kcal: "500",
-    time: "25 Mins",
-    level: "Advanced",
-    steps: [
-      { id: '1', title: 'Jumping Jacks', time: 10 },
-      { id: '2', title: 'Burpees', time: 10 },
-      { id: '3', title: 'Plank', time: 10 },
-    ]
-  },
-    '8': {
-    image: require('../../assets/images/16.jpg'),
-    description: "Unwind before bed with this gentle yoga flow designed to release tension and prepare your body for sleep.",
-    kcal: "500",
-    time: "25 Mins",
-    level: "Advanced",
-    steps: [
-      { id: '1', title: 'Jumping Jacks', time: 10 },
-      { id: '2', title: 'Burpees', time: 10 },
-      { id: '3', title: 'Plank', time: 10 },
-    ]
-  },
   'default': {
-    image: require('../../assets/images/1.jpg'),
+    image: require('../../assets/images/1.jpg'), 
     description: "General workout.",
     kcal: "200",
     time: "20 Mins",
@@ -130,6 +103,7 @@ const WORKOUT_DATA: any = {
 export default function WorkoutActiveScreen() {
   const router = useRouter();
   const { id, title } = useLocalSearchParams();
+  const auth = getAuth(); 
 
   const currentWorkout = WORKOUT_DATA[id as string] || WORKOUT_DATA['default'];
   const displayTitle = title || "Workout Details";
@@ -139,53 +113,87 @@ export default function WorkoutActiveScreen() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-
   const startWorkout = () => {
     setIsPlayerActive(true);
     setCurrentStepIndex(0);
-    setTimeLeft(currentWorkout.steps[0].time);
+    // Safety Check: Steps තිබේ නම් පමණක් පළමු පියවර ගන්න
+    if (currentWorkout.steps && currentWorkout.steps.length > 0) {
+        setTimeLeft(currentWorkout.steps[0].time);
+    }
     setIsPaused(false);
   };
 
   const closePlayer = () => {
+    setIsPaused(true); 
     Alert.alert("Quit Workout?", "Are you sure you want to quit?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Quit", onPress: () => setIsPlayerActive(false) } 
+      { text: "Cancel", style: "cancel", onPress: () => setIsPaused(false) },
+      { text: "Quit", style: "destructive", onPress: () => setIsPlayerActive(false) } 
     ]);
+  };
+
+  const handleNextStep = async () => {
+    // Safety Check
+    if (!currentWorkout.steps || currentWorkout.steps.length === 0) return;
+
+    if (currentStepIndex < currentWorkout.steps.length - 1) {
+      const nextIndex = currentStepIndex + 1;
+      setCurrentStepIndex(nextIndex);
+      setTimeLeft(currentWorkout.steps[nextIndex].time);
+    } else {
+      // --- WORKOUT FINISHED ---
+      setIsPaused(true);
+
+      if (auth.currentUser) {
+        await logCompletedWorkout(
+          auth.currentUser.uid,
+          displayTitle as string,   
+          currentWorkout.time.replace(' Mins', ''), 
+          currentWorkout.kcal     
+        );
+      }
+
+      Alert.alert("Workout Completed! 🎉", "Great job! Progress saved.", [
+        { text: "Finish", onPress: () => {
+           setIsPlayerActive(false);
+           router.back(); 
+        }}
+      ]);
+    }
   };
 
   useEffect(() => {
     if (!isPlayerActive || isPaused) return;
 
     if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      const timer = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
       return () => clearTimeout(timer);
     } else {
       handleNextStep();
     }
   }, [timeLeft, isPaused, isPlayerActive]);
 
-  const handleNextStep = () => {
-    if (currentStepIndex < currentWorkout.steps.length - 1) {
-      const nextIndex = currentStepIndex + 1;
-      setCurrentStepIndex(nextIndex);
-      setTimeLeft(currentWorkout.steps[nextIndex].time);
-    } else {
-      setIsPaused(true);
-      Alert.alert("Workout Completed! 🎉", "Great job!", [
-        { text: "Finish", onPress: () => setIsPlayerActive(false) }
-      ]);
-    }
-  };
-
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
+
+  // --- Render Player View ---
   if (isPlayerActive) {
-    const currentStep = currentWorkout.steps[currentStepIndex];
-    const nextStep = currentWorkout.steps[currentStepIndex + 1];
+    // Safety Check: Step එකක් නැත්නම් Loading පෙන්නන්න (Crash නොවී)
+    const currentStep = currentWorkout.steps ? currentWorkout.steps[currentStepIndex] : null;
+    const nextStep = currentWorkout.steps ? currentWorkout.steps[currentStepIndex + 1] : null;
+
+    if (!currentStep) {
+      return (
+        <View style={styles.container}>
+            <ActivityIndicator size="large" color={COLORS.primary} style={{marginTop: 50}} />
+            <TouchableOpacity onPress={() => setIsPlayerActive(false)} style={{marginTop:20, alignSelf:'center'}}>
+                <Text style={{color:'white'}}>Go Back</Text>
+            </TouchableOpacity>
+        </View>
+      );
+    }
 
     return (
       <View style={styles.container}>
@@ -211,10 +219,15 @@ export default function WorkoutActiveScreen() {
             </View>
           </View>
 
-          {nextStep && (
+          {nextStep ? (
             <View style={styles.nextContainer}>
               <Text style={styles.nextLabel}>Up Next:</Text>
               <Text style={styles.nextTitle}>{nextStep.title}</Text>
+            </View>
+          ) : (
+            <View style={styles.nextContainer}>
+                <Text style={styles.nextLabel}>Up Next:</Text>
+                <Text style={styles.nextTitle}>Finish</Text>
             </View>
           )}
 
@@ -248,6 +261,7 @@ export default function WorkoutActiveScreen() {
     );
   }
 
+  // --- Render Details View ---
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
@@ -294,13 +308,12 @@ export default function WorkoutActiveScreen() {
           <Text style={styles.sectionHeader}>Description</Text>
           <Text style={styles.description}>{currentWorkout.description}</Text>
 
-          {/* Steps List */}
           <View style={styles.listHeaderRow}>
             <Text style={styles.sectionHeader}>Rounds</Text>
-            <Text style={styles.itemCount}>{currentWorkout.steps.length} Sets</Text>
+            <Text style={styles.itemCount}>{currentWorkout.steps ? currentWorkout.steps.length : 0} Sets</Text>
           </View>
 
-          {currentWorkout.steps.map((step: any, index: number) => (
+          {currentWorkout.steps && currentWorkout.steps.map((step: Step, index: number) => (
             <View key={step.id} style={styles.exerciseRow}>
               <View style={styles.exerciseLeft}>
                 <Text style={styles.exerciseIndex}>{index + 1 < 10 ? `0${index + 1}` : index + 1}</Text>
@@ -329,8 +342,6 @@ export default function WorkoutActiveScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
-  
-  // --- Details Styles ---
   backgroundImage: { width: '100%', height: height * 0.45, justifyContent: 'space-between' },
   imageOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   header: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 50, paddingHorizontal: 20 },
@@ -357,8 +368,6 @@ const styles = StyleSheet.create({
   bottomButtonContainer: { position: 'absolute', bottom: 20, left: 20, right: 20 },
   startButton: { backgroundColor: COLORS.primary, padding: 18, borderRadius: 30, alignItems: 'center', shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
   startButtonText: { color: '#000', fontSize: 18, fontWeight: 'bold' },
-
-  // --- Player Styles ---
   playerBg: { flex: 1, justifyContent: 'center' },
   overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.7)' },
   playerHeader: { position: 'absolute', top: 50, left: 20, right: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
