@@ -24,7 +24,7 @@ const WORKOUT_PLANS = [
     level: 'Advanced',
     duration: '45 Min',
     kcal: '400',
-    image: require('../../assets/images/1.jpg'),
+    image: require('../../assets/images/9.jpg'),
     category: 'Strength'
   },
   {
@@ -33,7 +33,7 @@ const WORKOUT_PLANS = [
     level: 'Intermediate',
     duration: '30 Min',
     kcal: '350',
-    image: require('../../assets/images/3.jpg'),
+    image: require('../../assets/images/10.jpg'),
     category: 'Strength'
   },
   {
@@ -42,7 +42,7 @@ const WORKOUT_PLANS = [
     level: 'Beginner',
     duration: '20 Min',
     kcal: '150',
-    image: require('../../assets/images/4.jpg'),
+    image: require('../../assets/images/11.jpg'),
     category: 'Yoga'
   },
   {
@@ -51,7 +51,7 @@ const WORKOUT_PLANS = [
     level: 'Advanced',
     duration: '25 Min',
     kcal: '500',
-    image: require('../../assets/images/1.jpg'),
+    image: require('../../assets/images/12.jpg'),
     category: 'HIIT'
   },
   {
@@ -60,7 +60,7 @@ const WORKOUT_PLANS = [
     level: 'Intermediate',
     duration: '15 Min',
     kcal: '200',
-    image: require('../../assets/images/3.jpg'),
+    image: require('../../assets/images/13.jpg'),
     category: 'Strength'
   },
   {
@@ -69,7 +69,7 @@ const WORKOUT_PLANS = [
     level: 'Beginner',
     duration: '20 Min',
     kcal: '180',
-    image: require('../../assets/images/4.jpg'),
+    image: require('../../assets/images/114.jpg'),
     category: 'Pilates'
   },
   {
@@ -78,7 +78,7 @@ const WORKOUT_PLANS = [
     level: 'Advanced',
     duration: '40 Min',
     kcal: '450',
-    image: require('../../assets/images/1.jpg'),
+    image: require('../../assets/images/15.jpg'),
     category: 'Cardio'
   },
   {
@@ -87,7 +87,7 @@ const WORKOUT_PLANS = [
     level: 'Beginner',
     duration: '10 Min',
     kcal: '80',
-    image: require('../../assets/images/4.jpg'),
+    image: require('../../assets/images/16.jpg'),
     category: 'Yoga'
   },
 ];
