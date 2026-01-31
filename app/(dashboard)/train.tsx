@@ -13,12 +13,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import COLORS from '../../constants/Colors';
-//   primary: '#CCFF00', 
-//   background: '#000000',
-//   card: '#1C1C1E',
-//   text: '#FFFFFF',
-//   gray: '#888888',
-// };
 
 const CATEGORIES = ['All', 'Strength', 'Cardio', 'Yoga', 'HIIT', 'Pilates'];
 

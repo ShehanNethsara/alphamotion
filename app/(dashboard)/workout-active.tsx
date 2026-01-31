@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -6,96 +6,205 @@ import {
   ImageBackground, 
   TouchableOpacity, 
   ScrollView, 
-  Dimensions 
+  Dimensions,
+  Alert
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router'; // 1. useLocalSearchParams එකතු කළා
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import COLORS from '../../constants/Colors';
 
 const { height } = Dimensions.get('window');
 
-const COLORS = {
-  primary: '#CCFF00',
-  background: '#000000',
-  card: '#1C1C1E',
-  text: '#FFFFFF',
-  gray: '#888888',
-};
 
-// 2. හැම Workout ID එකකටම අදාළ විස්තර මෙතන හදාගමු
 const WORKOUT_DATA: any = {
   '1': {
     image: require('../../assets/images/1.jpg'),
-    description: "Build upper body strength with this intensive power routine targeting chest, arms, and shoulders.",
+    description: "Build upper body strength with this intensive power routine.",
     kcal: "320",
     time: "45 Mins",
     level: "Advanced",
     steps: [
-      { id: '1', title: 'Warm Up', time: '05:00' },
-      { id: '2', title: 'Push Ups', time: '02:00' },
-      { id: '3', title: 'Dumbbell Press', time: '03:00' },
-      { id: '4', title: 'Pull Ups', time: '02:00' },
+      { id: '1', title: 'Warm Up', time: 5 },
+      { id: '2', title: 'Push Ups', time: 10 },
+      { id: '3', title: 'Dumbbell Press', time: 10 },
+      { id: '4', title: 'Rest', time: 5 },
     ]
   },
   '2': {
     image: require('../../assets/images/3.jpg'),
-    description: "Sculpt your legs and glutes with this intermediate shredding workout.",
+    description: "Sculpt your legs and glutes.",
     kcal: "250",
     time: "30 Mins",
     level: "Inter.",
     steps: [
-      { id: '1', title: 'Jump Squats', time: '03:00' },
-      { id: '2', title: 'Lunges', time: '03:00' },
-      { id: '3', title: 'Calf Raises', time: '02:00' },
+      { id: '1', title: 'Jump Squats', time: 10 },
+      { id: '2', title: 'Lunges', time: 10 },
+      { id: '3', title: 'Rest', time: 5 },
     ]
   },
   '3': {
     image: require('../../assets/images/4.jpg'),
-    description: "Start your day with a relaxing yoga flow to improve flexibility and mindfulness.",
+    description: "Relaxing yoga flow.",
     kcal: "100",
     time: "20 Mins",
     level: "Beginner",
     steps: [
-      { id: '1', title: 'Sun Salutation', time: '05:00' },
-      { id: '2', title: 'Warrior Pose', time: '03:00' },
-      { id: '3', title: 'Tree Pose', time: '03:00' },
+      { id: '1', title: 'Sun Salutation', time: 15 },
+      { id: '2', title: 'Warrior Pose', time: 15 },
     ]
   },
-  // Default Data (ID එකක් අවුල් ගියොත් පෙන්නන්න)
+  '4': {
+    image: require('../../assets/images/1.jpg'),
+    description: "High intensity interval training.",
+    kcal: "500",
+    time: "25 Mins",
+    level: "Advanced",
+    steps: [
+      { id: '1', title: 'Jumping Jacks', time: 10 },
+      { id: '2', title: 'Burpees', time: 10 },
+      { id: '3', title: 'Plank', time: 10 },
+    ]
+  },
   'default': {
     image: require('../../assets/images/4.jpg'),
-    description: "A great workout to keep you fit and healthy.",
+    description: "General workout.",
     kcal: "200",
     time: "20 Mins",
     level: "General",
     steps: [
-      { id: '1', title: 'Warm Up', time: '05:00' },
-      { id: '2', title: 'Basic Exercise', time: '10:00' },
-      { id: '3', title: 'Cool Down', time: '05:00' },
+      { id: '1', title: 'Get Ready', time: 5 },
+      { id: '2', title: 'Go!', time: 10 },
     ]
   }
 };
 
 export default function WorkoutActiveScreen() {
   const router = useRouter();
-  
-  // 3. යැවූ ID එක සහ Title එක ලබා ගැනීම
-  const params = useLocalSearchParams();
-  const { id, title } = params;
+  const { id, title } = useLocalSearchParams();
 
-  // ID එකට අදාළ Data එක තෝරා ගැනීම (නැත්නම් default එක)
   const currentWorkout = WORKOUT_DATA[id as string] || WORKOUT_DATA['default'];
-  const displayTitle = title || "Workout Details"; // Title එක නාවොත් default එකක්
+  const displayTitle = title || "Workout Details";
+
+  const [isPlayerActive, setIsPlayerActive] = useState(false); 
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+
+  const startWorkout = () => {
+    setIsPlayerActive(true);
+    setCurrentStepIndex(0);
+    setTimeLeft(currentWorkout.steps[0].time);
+    setIsPaused(false);
+  };
+
+  const closePlayer = () => {
+    Alert.alert("Quit Workout?", "Are you sure you want to quit?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Quit", onPress: () => setIsPlayerActive(false) } 
+    ]);
+  };
+
+  useEffect(() => {
+    if (!isPlayerActive || isPaused) return;
+
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      handleNextStep();
+    }
+  }, [timeLeft, isPaused, isPlayerActive]);
+
+  const handleNextStep = () => {
+    if (currentStepIndex < currentWorkout.steps.length - 1) {
+      const nextIndex = currentStepIndex + 1;
+      setCurrentStepIndex(nextIndex);
+      setTimeLeft(currentWorkout.steps[nextIndex].time);
+    } else {
+      setIsPaused(true);
+      Alert.alert("Workout Completed! 🎉", "Great job!", [
+        { text: "Finish", onPress: () => setIsPlayerActive(false) }
+      ]);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+  if (isPlayerActive) {
+    const currentStep = currentWorkout.steps[currentStepIndex];
+    const nextStep = currentWorkout.steps[currentStepIndex + 1];
+
+    return (
+      <View style={styles.container}>
+        <StatusBar style="light" />
+        <ImageBackground 
+          source={currentWorkout.image} 
+          style={styles.playerBg} 
+          blurRadius={15}
+        >
+          <View style={styles.overlay} />
+
+          <View style={styles.playerHeader}>
+            <TouchableOpacity onPress={closePlayer} style={styles.closeBtn}>
+              <Ionicons name="close" size={30} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.stepCounter}>Step {currentStepIndex + 1} / {currentWorkout.steps.length}</Text>
+          </View>
+
+          <View style={styles.timerContainer}>
+            <View style={styles.circle}>
+              <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+              <Text style={styles.label}>{currentStep.title}</Text>
+            </View>
+          </View>
+
+          {nextStep && (
+            <View style={styles.nextContainer}>
+              <Text style={styles.nextLabel}>Up Next:</Text>
+              <Text style={styles.nextTitle}>{nextStep.title}</Text>
+            </View>
+          )}
+
+          <View style={styles.controls}>
+            <TouchableOpacity 
+              style={styles.controlBtn} 
+              onPress={() => {
+                if(currentStepIndex > 0) {
+                  const prevIndex = currentStepIndex - 1;
+                  setCurrentStepIndex(prevIndex);
+                  setTimeLeft(currentWorkout.steps[prevIndex].time);
+                }
+              }}
+            >
+              <Ionicons name="play-skip-back" size={30} color="#fff" />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.controlBtn, styles.playBtn]} 
+              onPress={() => setIsPaused(!isPaused)}
+            >
+              <Ionicons name={isPaused ? "play" : "pause"} size={40} color="#000" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.controlBtn} onPress={handleNextStep}>
+              <Ionicons name="play-skip-forward" size={30} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
 
-      {/* 1. Dynamic Image */}
-      <ImageBackground 
-        source={currentWorkout.image} 
-        style={styles.backgroundImage}
-      >
+      <ImageBackground source={currentWorkout.image} style={styles.backgroundImage}>
         <View style={styles.imageOverlay} />
         <View style={styles.header}>
           <TouchableOpacity style={styles.iconButton} onPress={() => router.back()}>
@@ -105,23 +214,18 @@ export default function WorkoutActiveScreen() {
             <Ionicons name="heart-outline" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
-
         <View style={styles.playButtonContainer}>
             <Ionicons name="play" size={40} color={COLORS.primary} style={{ marginLeft: 5 }} />
         </View>
       </ImageBackground>
 
-      {/* 2. Content */}
       <View style={styles.detailsContainer}>
         <View style={styles.barIndicator} />
         
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-          
-          {/* Dynamic Title */}
           <Text style={styles.title}>{displayTitle}</Text>
           <Text style={styles.subtitle}>Full Body • {currentWorkout.level}</Text>
 
-          {/* Dynamic Stats */}
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Ionicons name="time-outline" size={20} color={COLORS.primary} />
@@ -142,7 +246,7 @@ export default function WorkoutActiveScreen() {
           <Text style={styles.sectionHeader}>Description</Text>
           <Text style={styles.description}>{currentWorkout.description}</Text>
 
-          {/* Dynamic Steps List */}
+          {/* Steps List */}
           <View style={styles.listHeaderRow}>
             <Text style={styles.sectionHeader}>Rounds</Text>
             <Text style={styles.itemCount}>{currentWorkout.steps.length} Sets</Text>
@@ -157,14 +261,16 @@ export default function WorkoutActiveScreen() {
                     <Text style={styles.exerciseSub}>Repetitions</Text>
                 </View>
               </View>
-              <Text style={styles.exerciseTime}>{step.time}</Text>
+              <Text style={styles.exerciseTime}>{step.time}s</Text>
             </View>
           ))}
-
         </ScrollView>
 
         <View style={styles.bottomButtonContainer}>
-            <TouchableOpacity style={styles.startButton}>
+            <TouchableOpacity 
+              style={styles.startButton}
+              onPress={startWorkout} 
+            >
                 <Text style={styles.startButtonText}>Start Workout</Text>
             </TouchableOpacity>
         </View>
@@ -174,179 +280,50 @@ export default function WorkoutActiveScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  backgroundImage: {
-    width: '100%',
-    height: height * 0.45,
-    justifyContent: 'space-between',
-  },
-  imageOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingTop: 50,
-    paddingHorizontal: 20,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  playButtonContainer: {
-    alignSelf: 'center',
-    marginBottom: 40,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: COLORS.primary,
-  },
-  detailsContainer: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    marginTop: -30,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  barIndicator: {
-    width: 40,
-    height: 5,
-    backgroundColor: '#333',
-    borderRadius: 3,
-    alignSelf: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: COLORS.primary,
-    marginBottom: 20,
-    fontWeight: '600',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.card,
-    borderRadius: 15,
-    padding: 15,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 25,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  verticalLine: {
-    width: 1,
-    height: 20,
-    backgroundColor: '#333',
-  },
-  sectionHeader: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 10,
-  },
-  description: {
-    fontSize: 14,
-    color: COLORS.gray,
-    lineHeight: 22,
-    marginBottom: 25,
-  },
-  listHeaderRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 15
-  },
-  itemCount: {
-      color: COLORS.primary,
-      fontSize: 14,
-      fontWeight: '600'
-  },
-  exerciseRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: COLORS.card,
-    padding: 15,
-    borderRadius: 15,
-    marginBottom: 10,
-  },
-  exerciseLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 15
-  },
-  exerciseIndex: {
-      fontSize: 16,
-      color: '#fff',
-      fontWeight: 'bold',
-      opacity: 0.5
-  },
-  exerciseTitle: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
-  },
-  exerciseSub: {
-      fontSize: 12,
-      color: COLORS.gray,
-      marginTop: 2
-  },
-  exerciseTime: {
-    fontSize: 14,
-    color: COLORS.primary,
-    fontWeight: 'bold',
-  },
-  bottomButtonContainer: {
-      position: 'absolute',
-      bottom: 20,
-      left: 20,
-      right: 20,
-  },
-  startButton: {
-      backgroundColor: COLORS.primary,
-      padding: 18,
-      borderRadius: 30,
-      alignItems: 'center',
-      shadowColor: COLORS.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 10,
-      elevation: 5,
-  },
-  startButtonText: {
-      color: '#000',
-      fontSize: 18,
-      fontWeight: 'bold'
-  }
+  container: { flex: 1, backgroundColor: '#000' },
+  
+  // --- Details Styles ---
+  backgroundImage: { width: '100%', height: height * 0.45, justifyContent: 'space-between' },
+  imageOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 50, paddingHorizontal: 20 },
+  iconButton: { width: 40, height: 40, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
+  playButtonContainer: { alignSelf: 'center', marginBottom: 40, width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: COLORS.primary },
+  detailsContainer: { flex: 1, backgroundColor: COLORS.background, marginTop: -30, borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingHorizontal: 20, paddingTop: 10 },
+  barIndicator: { width: 40, height: 5, backgroundColor: '#333', borderRadius: 3, alignSelf: 'center', marginTop: 10, marginBottom: 20 },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#fff', marginBottom: 5 },
+  subtitle: { fontSize: 14, color: COLORS.primary, marginBottom: 20, fontWeight: '600' },
+  statsRow: { flexDirection: 'row', backgroundColor: COLORS.card, borderRadius: 15, padding: 15, justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
+  statItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  statText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  verticalLine: { width: 1, height: 20, backgroundColor: '#333' },
+  sectionHeader: { fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 10 },
+  description: { fontSize: 14, color: COLORS.gray, lineHeight: 22, marginBottom: 25 },
+  listHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
+  itemCount: { color: COLORS.primary, fontSize: 14, fontWeight: '600' },
+  exerciseRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: COLORS.card, padding: 15, borderRadius: 15, marginBottom: 10 },
+  exerciseLeft: { flexDirection: 'row', alignItems: 'center', gap: 15 },
+  exerciseIndex: { fontSize: 16, color: '#fff', fontWeight: 'bold', opacity: 0.5 },
+  exerciseTitle: { fontSize: 16, color: '#fff', fontWeight: '600' },
+  exerciseSub: { fontSize: 12, color: COLORS.gray, marginTop: 2 },
+  exerciseTime: { fontSize: 14, color: COLORS.primary, fontWeight: 'bold' },
+  bottomButtonContainer: { position: 'absolute', bottom: 20, left: 20, right: 20 },
+  startButton: { backgroundColor: COLORS.primary, padding: 18, borderRadius: 30, alignItems: 'center', shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
+  startButtonText: { color: '#000', fontSize: 18, fontWeight: 'bold' },
+
+  // --- Player Styles ---
+  playerBg: { flex: 1, justifyContent: 'center' },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.7)' },
+  playerHeader: { position: 'absolute', top: 50, left: 20, right: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  closeBtn: { padding: 10, backgroundColor: '#333', borderRadius: 20 },
+  stepCounter: { color: '#ccc', fontSize: 16, fontWeight: 'bold' },
+  timerContainer: { alignItems: 'center', justifyContent: 'center', marginBottom: 50 },
+  circle: { width: 250, height: 250, borderRadius: 125, borderWidth: 5, borderColor: COLORS.primary, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)' },
+  timerText: { color: '#fff', fontSize: 60, fontWeight: 'bold' },
+  label: { color: COLORS.primary, fontSize: 24, marginTop: 10, fontWeight: '600', textAlign: 'center' },
+  nextContainer: { alignItems: 'center', marginBottom: 50 },
+  nextLabel: { color: '#888', fontSize: 14, textTransform: 'uppercase' },
+  nextTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold', marginTop: 5 },
+  controls: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 30, marginBottom: 50 },
+  controlBtn: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' },
+  playBtn: { width: 80, height: 80, borderRadius: 40, backgroundColor: COLORS.primary },
 });

@@ -14,7 +14,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 
-// Correct Import
 import { loginUser } from '../../services/authService';
 import COLORS from '../../constants/Colors'; 
 
@@ -51,14 +50,11 @@ export default function LoginScreen() {
       <StatusBar style="light" />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         
-        {/* Header */}
         <View style={styles.header}>
-          {/* COLORS.neon වෙනුවට COLORS.primary භාවිතා කළා */}
           <Ionicons name="barbell" size={60} color={COLORS.primary} />
           <Text style={styles.title}>Welcome Back</Text>
         </View>
 
-        {/* Google Button */}
         <TouchableOpacity style={styles.googleButton}>
           <Ionicons name="logo-google" size={20} color="#fff" style={{ marginRight: 10 }} />
           <Text style={styles.googleButtonText}>Sign up with Google</Text>
@@ -66,12 +62,10 @@ export default function LoginScreen() {
 
         <View style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
-          {/* COLORS.textGray වෙනුවට COLORS.gray භාවිතා කළා */}
           <Text style={styles.dividerText}>Or Sign In With</Text>
           <View style={styles.dividerLine} />
         </View>
 
-        {/* Inputs */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Email address</Text>
           <TextInput
@@ -108,7 +102,6 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Login Button */}
         <TouchableOpacity 
           style={styles.loginButton} 
           onPress={handleLogin}
@@ -119,7 +112,6 @@ export default function LoginScreen() {
           </Text>
         </TouchableOpacity>
 
-        {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an Account? </Text>
           <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
@@ -135,7 +127,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // COLORS.black වෙනුවට COLORS.background භාවිතා කළා
     backgroundColor: COLORS.background,
   },
   scrollContainer: {
@@ -150,7 +141,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    // COLORS.white වෙනුවට COLORS.text භාවිතා කළා
     color: COLORS.text,
     marginTop: 10,
   },
@@ -195,7 +185,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   input: {
-    // COLORS.darkGray වෙනුවට COLORS.card භාවිතා කළා
     backgroundColor: COLORS.card,
     color: COLORS.text,
     padding: 15,

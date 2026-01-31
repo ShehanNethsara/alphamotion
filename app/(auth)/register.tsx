@@ -12,18 +12,10 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'; // updateProfile import කළා
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { StatusBar } from 'expo-status-bar';
 import { auth } from '@/config/firebase';
-
-// Theme Colors
-const COLORS = {
-  neon: '#CCFF00',
-  black: '#000000',
-  darkGray: '#1C1C1E',
-  textGray: '#666666',
-  white: '#FFFFFF',
-};
+import COLORS from '../../constants/Colors'; 
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -35,7 +27,7 @@ export default function RegisterScreen() {
   const [agreeTerms, setAgreeTerms] = useState(false);
 
   const handleRegister = async () => {
-    // 1. Validation Check
+    // Validation Check
     if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
@@ -48,11 +40,10 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      // 2. Firebase Account එක හදනවා
+      // create Firebase Account and update profile with name
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // 3. නම (Display Name) Update කරනවා (වැදගත්ම කොටස)
       await updateProfile(user, {
         displayName: name
       });
@@ -61,8 +52,6 @@ export default function RegisterScreen() {
 
       Alert.alert('Success', 'Account created successfully!');
       
-      // 4. සාර්ථක වූ පසු ඊළඟ පිටුවට යවනවා
-      // (ඔයාට කෙලින්ම Home යවන්න ඕන නම් '/(dashboard)/home' දාන්න)
       router.replace('/(onboarding)/success'); 
       
     } catch (error: any) {
@@ -80,14 +69,12 @@ export default function RegisterScreen() {
       <StatusBar style="light" />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         
-        {/* Header Section */}
         <View style={styles.header}>
-          <Ionicons name="barbell" size={50} color={COLORS.neon} />
+          <Ionicons name="barbell" size={50} color={COLORS.primary} />
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join the Alpha Motion community</Text>
         </View>
 
-        {/* Google Sign Up (UI Only) */}
         <TouchableOpacity style={styles.googleButton}>
           <Ionicons name="logo-google" size={20} color="#fff" style={{ marginRight: 10 }} />
           <Text style={styles.googleButtonText}>Sign up with Google</Text>
@@ -99,13 +86,12 @@ export default function RegisterScreen() {
           <View style={styles.dividerLine} />
         </View>
 
-        {/* Input Fields */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Full Name</Text>
           <TextInput
             style={styles.input}
             placeholder="John Doe"
-            placeholderTextColor={COLORS.textGray}
+            placeholderTextColor={COLORS.gray}
             value={name}
             onChangeText={setName}
           />
@@ -114,7 +100,7 @@ export default function RegisterScreen() {
           <TextInput
             style={styles.input}
             placeholder="example@gmail.com"
-            placeholderTextColor={COLORS.textGray}
+            placeholderTextColor={COLORS.gray}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -126,7 +112,7 @@ export default function RegisterScreen() {
             <TextInput
               style={styles.passwordInput}
               placeholder="*******"
-              placeholderTextColor={COLORS.textGray}
+              placeholderTextColor={COLORS.gray}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -135,32 +121,29 @@ export default function RegisterScreen() {
               <Ionicons 
                 name={showPassword ? "eye-off" : "eye"} 
                 size={20} 
-                color={COLORS.textGray} 
+                color={COLORS.gray} 
               />
             </TouchableOpacity>
           </View>
 
-          {/* Password Strength Indicator */}
           <View style={styles.strengthContainer}>
-            <View style={[styles.strengthBar, { backgroundColor: password.length > 0 ? COLORS.neon : '#333' }]} />
-            <View style={[styles.strengthBar, { backgroundColor: password.length > 6 ? COLORS.neon : '#333' }]} />
-            <View style={[styles.strengthBar, { backgroundColor: password.length > 8 ? COLORS.neon : '#333' }]} />
-            <View style={[styles.strengthBar, { backgroundColor: password.length > 10 ? COLORS.neon : '#333' }]} />
+            <View style={[styles.strengthBar, { backgroundColor: password.length > 0 ? COLORS.primary : '#333' }]} />
+            <View style={[styles.strengthBar, { backgroundColor: password.length > 6 ? COLORS.primary : '#333' }]} />
+            <View style={[styles.strengthBar, { backgroundColor: password.length > 8 ? COLORS.primary : '#333' }]} />
+            <View style={[styles.strengthBar, { backgroundColor: password.length > 10 ? COLORS.primary : '#333' }]} />
           </View>
         </View>
 
-        {/* Checkbox */}
         <TouchableOpacity 
           style={styles.checkboxContainer} 
           onPress={() => setAgreeTerms(!agreeTerms)}
         >
-          <View style={[styles.checkbox, agreeTerms && { backgroundColor: COLORS.neon }]}>
+          <View style={[styles.checkbox, agreeTerms && { backgroundColor: COLORS.primary, borderColor: COLORS.primary }]}>
             {agreeTerms && <Ionicons name="checkmark" size={14} color="black" />}
           </View>
           <Text style={styles.checkboxText}>I agree to the Terms & Privacy Policy</Text>
         </TouchableOpacity>
 
-        {/* Sign Up Button */}
         <TouchableOpacity 
           style={styles.registerButton} 
           onPress={handleRegister}
@@ -171,7 +154,6 @@ export default function RegisterScreen() {
           </Text>
         </TouchableOpacity>
 
-        {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Already have an account? </Text>
           <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
@@ -187,7 +169,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.black,
+    backgroundColor: COLORS.background,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -201,11 +183,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.white,
+    color: COLORS.text,
     marginTop: 10,
   },
   subtitle: {
-    color: COLORS.textGray,
+    color: COLORS.gray,
     fontSize: 14,
     marginTop: 5,
   },
@@ -221,7 +203,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.05)',
   },
   googleButtonText: {
-    color: COLORS.white,
+    color: COLORS.text,
     fontSize: 16,
     fontWeight: '500',
   },
@@ -236,7 +218,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
   },
   dividerText: {
-    color: COLORS.textGray,
+    color: COLORS.gray,
     paddingHorizontal: 10,
     fontSize: 12,
   },
@@ -244,14 +226,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   label: {
-    color: COLORS.white,
+    color: COLORS.text,
     fontSize: 14,
     marginBottom: 8,
     marginLeft: 5,
   },
   input: {
-    backgroundColor: COLORS.darkGray,
-    color: COLORS.white,
+    backgroundColor: COLORS.card,
+    color: COLORS.text,
     padding: 15,
     borderRadius: 15,
     marginBottom: 15,
@@ -261,7 +243,7 @@ const styles = StyleSheet.create({
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.darkGray,
+    backgroundColor: COLORS.card,
     borderRadius: 15,
     borderWidth: 1,
     borderColor: '#333',
@@ -269,7 +251,7 @@ const styles = StyleSheet.create({
   },
   passwordInput: {
     flex: 1,
-    color: COLORS.white,
+    color: COLORS.text,
     paddingVertical: 15,
   },
   strengthContainer: {
@@ -294,17 +276,17 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: COLORS.textGray,
+    borderColor: COLORS.gray,
     marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxText: {
-    color: COLORS.textGray,
+    color: COLORS.gray,
     fontSize: 12,
   },
   registerButton: {
-    backgroundColor: COLORS.neon,
+    backgroundColor: COLORS.primary,
     paddingVertical: 18,
     borderRadius: 30,
     alignItems: 'center',
@@ -312,7 +294,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   registerButtonText: {
-    color: COLORS.black,
+    color: '#000',
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -322,11 +304,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   footerText: {
-    color: COLORS.textGray,
+    color: COLORS.gray,
     fontSize: 14,
   },
   loginText: {
-    color: COLORS.neon,
+    color: COLORS.primary,
     fontWeight: 'bold',
     fontSize: 14,
   },
