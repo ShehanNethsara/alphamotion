@@ -19,7 +19,7 @@ const { height } = Dimensions.get('window');
 
 const WORKOUT_DATA: any = {
   '1': {
-    image: require('../../assets/images/1.jpg'),
+    image: require('../../assets/images/9.jpg'),
     description: "Build upper body strength with this intensive power routine.",
     kcal: "320",
     time: "45 Mins",
@@ -32,7 +32,7 @@ const WORKOUT_DATA: any = {
     ]
   },
   '2': {
-    image: require('../../assets/images/3.jpg'),
+    image: require('../../assets/images/10.jpg'),
     description: "Sculpt your legs and glutes.",
     kcal: "250",
     time: "30 Mins",
@@ -44,7 +44,7 @@ const WORKOUT_DATA: any = {
     ]
   },
   '3': {
-    image: require('../../assets/images/4.jpg'),
+    image: require('../../assets/images/11.jpg'),
     description: "Relaxing yoga flow.",
     kcal: "100",
     time: "20 Mins",
@@ -55,7 +55,7 @@ const WORKOUT_DATA: any = {
     ]
   },
   '4': {
-    image: require('../../assets/images/1.jpg'),
+    image: require('../../assets/images/12.jpg'),
     description: "High intensity interval training.",
     kcal: "500",
     time: "25 Mins",
@@ -66,8 +66,56 @@ const WORKOUT_DATA: any = {
       { id: '3', title: 'Plank', time: 10 },
     ]
   },
+    '5': {
+    image: require('../../assets/images/13.jpg'),
+    description: "A high-intensity full body cardio session designed to torch calories and boost your endurance limits.",   
+    kcal: "500",
+    time: "25 Mins",
+    level: "Advanced",
+    steps: [
+      { id: '1', title: 'Jumping Jacks', time: 10 },
+      { id: '2', title: 'Burpees', time: 10 },
+      { id: '3', title: 'Plank', time: 10 },
+    ]
+  },
+    '6': {
+    image: require('../../assets/images/114.jpg'),
+    description: "Improve your posture and strengthen your back muscles with these gentle but effective Pilates movements.",
+    kcal: "500",
+    time: "25 Mins",
+    level: "Advanced",
+    steps: [
+      { id: '1', title: 'Jumping Jacks', time: 10 },
+      { id: '2', title: 'Burpees', time: 10 },
+      { id: '3', title: 'Plank', time: 10 },
+    ]
+  },
+    '7': {
+    image: require('../../assets/images/15.jpg'),
+    description: "A high-intensity full body cardio session designed to torch calories and boost your endurance limits.",
+    kcal: "500",
+    time: "25 Mins",
+    level: "Advanced",
+    steps: [
+      { id: '1', title: 'Jumping Jacks', time: 10 },
+      { id: '2', title: 'Burpees', time: 10 },
+      { id: '3', title: 'Plank', time: 10 },
+    ]
+  },
+    '8': {
+    image: require('../../assets/images/16.jpg'),
+    description: "Unwind before bed with this gentle yoga flow designed to release tension and prepare your body for sleep.",
+    kcal: "500",
+    time: "25 Mins",
+    level: "Advanced",
+    steps: [
+      { id: '1', title: 'Jumping Jacks', time: 10 },
+      { id: '2', title: 'Burpees', time: 10 },
+      { id: '3', title: 'Plank', time: 10 },
+    ]
+  },
   'default': {
-    image: require('../../assets/images/4.jpg'),
+    image: require('../../assets/images/1.jpg'),
     description: "General workout.",
     kcal: "200",
     time: "20 Mins",
