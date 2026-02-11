@@ -7,7 +7,8 @@ import {
   doc, 
   query, 
   where,
-  orderBy
+  orderBy,
+  limit // 👈 Data Limit කරන්න මේක ඕන
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
@@ -24,16 +25,15 @@ export interface WorkoutLog {
   id?: string;
   userId: string;
   workoutTitle: string;
-  duration: number; // ගණන් හදන්න පහසු වෙන්න Number ලෙස
+  duration: number; 
   kcal: number;
-  date: string; // ISO String (Date & Time)
+  date: string; 
 }
 
 // ==========================================
 // 1. CUSTOM WORKOUTS (CRUD)
 // ==========================================
 
-// Add Workout
 export const addCustomWorkout = async (workout: Workout) => {
   try {
     const docRef = await addDoc(collection(db, 'userWorkouts'), workout);
@@ -44,7 +44,6 @@ export const addCustomWorkout = async (workout: Workout) => {
   }
 };
 
-// Get All Workouts
 export const getUserWorkouts = async (userId: string) => {
   try {
     const q = query(collection(db, 'userWorkouts'), where("userId", "==", userId));
@@ -56,7 +55,6 @@ export const getUserWorkouts = async (userId: string) => {
   }
 };
 
-// Update Workout
 export const updateCustomWorkout = async (id: string, updatedData: Partial<Workout>) => {
   try {
     const workoutRef = doc(db, 'userWorkouts', id);
@@ -67,7 +65,6 @@ export const updateCustomWorkout = async (id: string, updatedData: Partial<Worko
   }
 };
 
-// Delete Workout
 export const deleteCustomWorkout = async (id: string) => {
   try {
     await deleteDoc(doc(db, 'userWorkouts', id));
@@ -78,17 +75,16 @@ export const deleteCustomWorkout = async (id: string) => {
 };
 
 // ==========================================
-// 2. REPORT SYSTEM (LOGS & STATS)
+// 2. REPORT SYSTEM (LOGS & STATS) - FAST ⚡
 // ==========================================
 
-// Workout එකක් ඉවර වුනාම Save කරන Function එක
 export const logCompletedWorkout = async (userId: string, workoutTitle: string, durationStr: string, kcalStr: string) => {
   try {
     const logData: WorkoutLog = {
       userId,
       workoutTitle: workoutTitle || "Workout",
-      duration: parseInt(durationStr) || 0, // String -> Number
-      kcal: parseInt(kcalStr) || 0,         // String -> Number
+      duration: parseInt(durationStr) || 0, 
+      kcal: parseInt(kcalStr) || 0,         
       date: new Date().toISOString()
     };
     
@@ -99,31 +95,33 @@ export const logCompletedWorkout = async (userId: string, workoutTitle: string, 
   }
 };
 
-// Report Page එකට Data ගන්න Function එක (Today vs Total)
+// Report Page එකට Data ගන්න Function එක (Optimized)
 export const getWorkoutStats = async (userId: string) => {
   try {
-    // 1. Database එකෙන්ම Sort කරලා ඉල්ලනවා (අලුත් ඒවා උඩට)
+    // 🔥 වේගවත් කිරීම: අන්තිම 50 විතරක් ගන්නවා.
+    // මුළු ලිස්ට් එකම ගත්තොත් පස්සේ කාලෙක ඇප් එක ස්ලෝ වෙනවා.
     const q = query(
       collection(db, 'workoutLogs'), 
       where("userId", "==", userId),
-      orderBy("date", "desc") 
+      orderBy("date", "desc"),
+      limit(50) 
     );
 
     const querySnapshot = await getDocs(q);
     const logs = querySnapshot.docs.map(doc => doc.data() as WorkoutLog);
 
-    // --- DATE CALCULATION (අද දවස හොයාගැනීම) ---
-    const todayStr = new Date().toDateString(); // උදා: "Fri Jan 31 2026"
+    // --- DATE CALCULATION ---
+    const todayStr = new Date().toDateString(); // "Fri Jan 31 2026"
 
-    // අද දවසට අදාළ ඒවා විතරක් ෆිල්ටර් කරනවා
+    // අද දවසට අදාළ ඒවා ෆිල්ටර් කරනවා
     const todayLogs = logs.filter(log => new Date(log.date).toDateString() === todayStr);
 
-    // 2. අද දවසේ එකතුව (Today's Stats)
+    // 1. අද දවසේ එකතුව (Today's Stats)
     const todayWorkouts = todayLogs.length;
     const todayMinutes = todayLogs.reduce((sum, item) => sum + item.duration, 0);
     const todayCalories = todayLogs.reduce((sum, item) => sum + item.kcal, 0);
 
-    // 3. මුළු ජීවිත කාලෙම එකතුව (Total Stats - අවශ්‍ය නම් පාවිච්චි කරන්න)
+    // 2. පෙන්නන ලිස්ට් එකේ එකතුව (Total of loaded logs)
     const totalWorkouts = logs.length;
     const totalMinutes = logs.reduce((sum, item) => sum + item.duration, 0);
     const totalCalories = logs.reduce((sum, item) => sum + item.kcal, 0);
@@ -139,18 +137,18 @@ export const getWorkoutStats = async (userId: string) => {
         minutes: totalMinutes,
         calories: totalCalories
       },
-      history: logs // ලිස්ට් එකට ඔක්කොම යවනවා
+      history: logs
     };
 
   } catch (error: any) {
     console.error("Error getting stats:", error);
     
-    // ⚠️ වැදගත්: Index Error එකක් ආවොත් ලින්ක් එක Console එකේ පෙන්නන්න
+    // 👇 මේක ඉතාම වැදගත්: Index Error එකක් ආවොත් ලින්ක් එක Console එකේ පෙන්නන්න
     if (error.message && error.message.includes("index")) {
-        console.log("⚠️ FIREBASE INDEX REQUIRED: Please check the link in your terminal console.");
+        console.log("⚠️ FIREBASE INDEX REQUIRED: Please check the link in your terminal/console to create the index!");
+        console.log("Link eka click karanna: ", error.message);
     }
     
-    // Error ආවොත් බිංදුව යවනවා
     return { 
       today: { workouts: 0, minutes: 0, calories: 0 }, 
       total: { workouts: 0, minutes: 0, calories: 0 }, 

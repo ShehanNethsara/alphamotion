@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -7,25 +7,49 @@ import {
   TouchableOpacity, 
   ScrollView, 
   Switch,
-  Alert 
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { logoutUser } from '../../services/authService'; // ඔයාගේ authService එක import කරගන්න
-
-const COLORS = {
-  primary: '#CCFF00', // Neon Green
-  background: '#000000',
-  card: '#1C1C1E',
-  text: '#FFFFFF',
-  gray: '#888888',
-  danger: '#FF3B30',
-};
+import { getAuth, signOut } from 'firebase/auth'; // Firebase Auth එක ගන්න
+import { getUserData } from '../../services/userService'; // Database එකෙන් විස්තර ගන්න
+import COLORS from '../../constants/Colors';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const auth = getAuth();
+  const user = auth.currentUser;
+
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  
+  // User Data සඳහා State
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  // 1. Data Load කරනවා (Login වෙන කෙනාගේ විස්තර)
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (user) {
+        setEmail(user.email || 'No Email');
+        setName(user.displayName || 'User');
+        
+        // Database එකෙනුත් විස්තර ගන්නවා (සමහර විට නම එතන තියෙන්න පුළුවන්)
+        try {
+          const dbData = await getUserData(user.uid);
+          if (dbData && dbData.name) {
+            setName(dbData.name);
+          }
+        } catch (error) {
+          console.log("Error loading user data", error);
+        }
+        setLoading(false);
+      }
+    };
+    loadProfile();
+  }, []);
 
   // Logout Function
   const handleLogout = async () => {
@@ -39,8 +63,8 @@ export default function ProfileScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await logoutUser();
-              router.replace('/(auth)/login'); // Login පිටුවට යවනවා
+              await signOut(auth);
+              router.replace('/(auth)/login'); 
             } catch (error) {
               Alert.alert("Error", "Failed to logout.");
             }
@@ -49,6 +73,14 @@ export default function ProfileScreen() {
       ]
     );
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, {justifyContent:'center', alignItems:'center'}]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -67,23 +99,26 @@ export default function ProfileScreen() {
         {/* Profile Info Section */}
         <View style={styles.profileSection}>
           <View style={styles.imageContainer}>
+            {/* User Image එක නැත්නම් Default එකක් පෙන්වන්න */}
             <Image 
-              source={require('../../assets/images/1.jpg')} // Profile Picture එක මෙතනට දාන්න
+              source={require('../../assets/images/1.jpg')} 
               style={styles.profileImage} 
             />
             <TouchableOpacity style={styles.editBadge}>
               <Ionicons name="camera" size={14} color="#000" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.userName}>Tanya Hill</Text>
-          <Text style={styles.userEmail}>tanya.hill@example.com</Text>
+
+          {/* 👇 මෙන්න මෙතන තමයි නම සහ Email එක පෙන්වන්නේ */}
+          <Text style={styles.userName}>{name}</Text>
+          <Text style={styles.userEmail}>{email}</Text>
 
           <TouchableOpacity style={styles.editButton}>
             <Text style={styles.editButtonText}>Edit Profile</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Stats Row */}
+        {/* Stats Row (Static Data - මේවා පස්සේ Database එකට සම්බන්ධ කරන්න පුළුවන්) */}
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
             <Text style={styles.statValue}>60 kg</Text>
@@ -303,7 +338,3 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
-
-
-
-
