@@ -27,6 +27,7 @@ export default function RegisterScreen() {
   const [agreeTerms, setAgreeTerms] = useState(false);
 
   const handleRegister = async () => {
+    // 1. Validation
     if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
@@ -35,11 +36,16 @@ export default function RegisterScreen() {
       Alert.alert('Error', 'Please agree to the terms.');
       return;
     }
+
     setLoading(true);
     try {
+      // 2. Register User in Firebase
       await registerUser(email, password, name);
-      Alert.alert('Success', 'Account created successfully!');
-      router.replace('/(dashboard)/home');
+
+      // 3. Success! Navigate to User Info Screen
+      // (Home එකට කලින් විස්තර පුරවන්න මෙතනට යවනවා)
+      router.replace('/(onboarding)/user-info'); 
+
     } catch (error: any) {
       Alert.alert('Registration Failed', error.message);
     } finally {

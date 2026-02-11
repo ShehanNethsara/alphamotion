@@ -13,8 +13,9 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { getAuth, signOut } from 'firebase/auth'; // Firebase Auth එක ගන්න
-import { getUserData } from '../../services/userService'; // Database එකෙන් විස්තර ගන්න
+import { getAuth, signOut } from 'firebase/auth';
+import * as ImagePicker from 'expo-image-picker'; 
+import { getUserData, uploadProfileImage } from '../../services/userService';
 import COLORS from '../../constants/Colors';
 
 export default function ProfileScreen() {
@@ -23,27 +24,27 @@ export default function ProfileScreen() {
   const user = auth.currentUser;
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  
-  // User Data සඳහා State
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [photoURL, setPhotoURL] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
-  // 1. Data Load කරනවා (Login වෙන කෙනාගේ විස්තර)
   useEffect(() => {
     const loadProfile = async () => {
       if (user) {
-        setEmail(user.email || 'No Email');
+        setEmail(user.email || '');
         setName(user.displayName || 'User');
+        setPhotoURL(user.photoURL); // Auth එකේ තියෙන Photo එක ගන්නවා
         
-        // Database එකෙනුත් විස්තර ගන්නවා (සමහර විට නම එතන තියෙන්න පුළුවන්)
         try {
           const dbData = await getUserData(user.uid);
-          if (dbData && dbData.name) {
-            setName(dbData.name);
+          if (dbData) {
+            if (dbData.name) setName(dbData.name);
+            if (dbData.photoURL) setPhotoURL(dbData.photoURL); // Database එකෙනුත් ගන්නවා
           }
         } catch (error) {
-          console.log("Error loading user data", error);
+          console.log("Error loading data", error);
         }
         setLoading(false);
       }
@@ -51,27 +52,48 @@ export default function ProfileScreen() {
     loadProfile();
   }, []);
 
-  // Logout Function
+  // Photo තෝරාගැනීම සහ Upload කිරීම
+  const pickImage = async () => {
+    // Permission ඉල්ලනවා
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5, // Size එක අඩු කරන්න
+    });
+
+    if (!result.canceled && user) {
+      const uri = result.assets[0].uri;
+      setPhotoURL(uri); // UI එකේ ඉක්මනට පෙන්නන්න
+      setUploading(true);
+      
+      try {
+        const downloadURL = await uploadProfileImage(user.uid, uri);
+        setPhotoURL(downloadURL);
+        Alert.alert("Success", "Profile picture updated! 📸");
+      } catch (error) {
+        Alert.alert("Error", "Failed to upload image.");
+        // Error ආවොත් පරණ එකම තියාගන්න (Optional)
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
   const handleLogout = async () => {
-    Alert.alert(
-      "Log Out",
-      "Are you sure you want to log out?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { 
-          text: "Log Out", 
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await signOut(auth);
-              router.replace('/(auth)/login'); 
-            } catch (error) {
-              Alert.alert("Error", "Failed to logout.");
-            }
-          }
-        }
-      ]
-    );
+    Alert.alert("Log Out", "Are you sure?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Log Out", style: "destructive", onPress: async () => {
+          await signOut(auth);
+          router.replace('/(auth)/login'); 
+      }}
+    ]);
   };
 
   if (loading) {
@@ -86,7 +108,6 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <StatusBar style="light" />
       
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
         <TouchableOpacity>
@@ -96,20 +117,26 @@ export default function ProfileScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* Profile Info Section */}
         <View style={styles.profileSection}>
           <View style={styles.imageContainer}>
-            {/* User Image එක නැත්නම් Default එකක් පෙන්වන්න */}
+            {/* Loading වෙනකොට Spinner එකක් පෙන්නනවා */}
+            {uploading && (
+              <View style={styles.uploadingOverlay}>
+                 <ActivityIndicator color={COLORS.primary} />
+              </View>
+            )}
+            
             <Image 
-              source={require('../../assets/images/1.jpg')} 
+              source={photoURL ? { uri: photoURL } : require('../../assets/images/1.jpg')} 
               style={styles.profileImage} 
             />
-            <TouchableOpacity style={styles.editBadge}>
-              <Ionicons name="camera" size={14} color="#000" />
+            
+            {/* Camera Icon Button */}
+            <TouchableOpacity style={styles.editBadge} onPress={pickImage} disabled={uploading}>
+              <Ionicons name="camera" size={16} color="#000" />
             </TouchableOpacity>
           </View>
 
-          {/* 👇 මෙන්න මෙතන තමයි නම සහ Email එක පෙන්වන්නේ */}
           <Text style={styles.userName}>{name}</Text>
           <Text style={styles.userEmail}>{email}</Text>
 
@@ -118,7 +145,8 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Stats Row (Static Data - මේවා පස්සේ Database එකට සම්බන්ධ කරන්න පුළුවන්) */}
+        {/* ... (අනිත් කොටස් පරණ විදිහමයි) ... */}
+        {/* Stats Row */}
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
             <Text style={styles.statValue}>60 kg</Text>
@@ -139,7 +167,6 @@ export default function ProfileScreen() {
         {/* Settings Section */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>General</Text>
-
           <TouchableOpacity style={styles.optionRow}>
             <View style={styles.optionLeft}>
               <View style={styles.iconBox}><Ionicons name="person-outline" size={20} color="#fff" /></View>
@@ -147,7 +174,6 @@ export default function ProfileScreen() {
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
           </TouchableOpacity>
-
           <View style={styles.optionRow}>
             <View style={styles.optionLeft}>
               <View style={styles.iconBox}><Ionicons name="notifications-outline" size={20} color="#fff" /></View>
@@ -160,7 +186,6 @@ export default function ProfileScreen() {
               onValueChange={setNotificationsEnabled}
             />
           </View>
-
           <TouchableOpacity style={styles.optionRow}>
             <View style={styles.optionLeft}>
               <View style={styles.iconBox}><Ionicons name="lock-closed-outline" size={20} color="#fff" /></View>
@@ -173,7 +198,6 @@ export default function ProfileScreen() {
         {/* Other Section */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>Other</Text>
-
           <TouchableOpacity style={styles.optionRow}>
             <View style={styles.optionLeft}>
               <View style={styles.iconBox}><Ionicons name="help-circle-outline" size={20} color="#fff" /></View>
@@ -181,8 +205,6 @@ export default function ProfileScreen() {
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
           </TouchableOpacity>
-
-          {/* Logout Button */}
           <TouchableOpacity style={styles.optionRow} onPress={handleLogout}>
             <View style={styles.optionLeft}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(255, 59, 48, 0.15)' }]}>
@@ -199,142 +221,41 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: COLORS.text,
-  },
-  scrollContent: {
-    paddingBottom: 100,
-  },
+  container: { flex: 1, backgroundColor: COLORS.background },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 50, paddingBottom: 20 },
+  headerTitle: { fontSize: 22, fontWeight: 'bold', color: COLORS.text },
+  scrollContent: { paddingBottom: 100 },
   
-  // Profile Section
-  profileSection: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  imageContainer: {
-    position: 'relative',
-    marginBottom: 15,
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 3,
-    borderColor: COLORS.primary,
-  },
-  editBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: COLORS.primary,
-    padding: 8,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#000',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: 5,
-  },
-  userEmail: {
-    fontSize: 14,
-    color: COLORS.gray,
-    marginBottom: 20,
-  },
-  editButton: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 25,
-  },
-  editButtonText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-
-  // Stats
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.card,
-    marginHorizontal: 20,
-    padding: 20,
-    borderRadius: 20,
-    marginBottom: 30,
-  },
-  statBox: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statValue: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  statLabel: {
-    color: COLORS.gray,
-    fontSize: 12,
-  },
-  divider: {
-    width: 1,
-    height: '100%',
-    backgroundColor: '#333',
-  },
-
-  // Settings Lists
-  sectionContainer: {
-    marginBottom: 25,
-    paddingHorizontal: 20,
-  },
-  sectionHeader: {
-    color: COLORS.text,
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: COLORS.card,
-    padding: 15,
-    borderRadius: 15,
-    marginBottom: 10,
-  },
-  optionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: '#333',
+  profileSection: { alignItems: 'center', marginBottom: 30 },
+  imageContainer: { position: 'relative', marginBottom: 15 },
+  profileImage: { width: 100, height: 100, borderRadius: 50, borderWidth: 3, borderColor: COLORS.primary },
+  
+  editBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: COLORS.primary, padding: 8, borderRadius: 20, borderWidth: 2, borderColor: '#000', zIndex: 2 },
+  
+  uploadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    borderRadius: 50,
+    zIndex: 1
   },
-  optionText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-  },
+
+  userName: { fontSize: 24, fontWeight: 'bold', color: COLORS.text, marginBottom: 5 },
+  userEmail: { fontSize: 14, color: COLORS.gray, marginBottom: 20 },
+  editButton: { backgroundColor: COLORS.primary, paddingVertical: 10, paddingHorizontal: 25, borderRadius: 25 },
+  editButtonText: { color: '#000', fontWeight: 'bold', fontSize: 14 },
+
+  statsContainer: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: COLORS.card, marginHorizontal: 20, padding: 20, borderRadius: 20, marginBottom: 30 },
+  statBox: { alignItems: 'center', flex: 1 },
+  statValue: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
+  statLabel: { color: COLORS.gray, fontSize: 12 },
+  divider: { width: 1, height: '100%', backgroundColor: '#333' },
+
+  sectionContainer: { marginBottom: 25, paddingHorizontal: 20 },
+  sectionHeader: { color: COLORS.text, fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
+  optionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: COLORS.card, padding: 15, borderRadius: 15, marginBottom: 10 },
+  optionLeft: { flexDirection: 'row', alignItems: 'center' },
+  iconBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#333', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
+  optionText: { color: '#fff', fontSize: 16, fontWeight: '500' },
 });
