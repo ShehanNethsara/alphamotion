@@ -27,7 +27,7 @@ export default function RegisterScreen() {
   const [agreeTerms, setAgreeTerms] = useState(false);
 
   const handleRegister = async () => {
-    // 1. Validation
+    //  Validation
     if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
@@ -39,11 +39,10 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      // 2. Register User in Firebase
+      //  Register User in Firebase
       await registerUser(email, password, name);
 
-      // 3. Success! Navigate to User Info Screen
-      // (Home එකට කලින් විස්තර පුරවන්න මෙතනට යවනවා)
+      // Success! Navigate to User Info Screen
       router.replace('/(onboarding)/user-info'); 
 
     } catch (error: any) {
@@ -90,7 +89,6 @@ export default function RegisterScreen() {
           />
         </View>
 
-        {/* Checkbox */}
         <TouchableOpacity 
           style={styles.checkboxContainer} 
           onPress={() => setAgreeTerms(!agreeTerms)}
@@ -101,7 +99,6 @@ export default function RegisterScreen() {
           <Text style={styles.checkboxText}>I agree to the Terms & Privacy Policy</Text>
         </TouchableOpacity>
 
-        {/* Register Button */}
         <PrimaryButton 
           title="Sign Up" 
           onPress={handleRegister} 

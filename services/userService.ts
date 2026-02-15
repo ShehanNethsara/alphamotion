@@ -1,11 +1,12 @@
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore'; 
 import { updateProfile } from 'firebase/auth';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Storage Imports
 import { auth, db } from '../config/firebase';
 
-// ==========================================
-// 1. User විස්තර ලබාගැනීම (Fetch User Data)
-// ==========================================
+
+const CLOUD_NAME = "dzle4zmly"; 
+const UPLOAD_PRESET = "Shehen_Nethsara"; 
+
+// User details
 export const getUserData = async (userId: string) => {
   try {
     const userDoc = await getDoc(doc(db, "users", userId));
@@ -20,53 +21,52 @@ export const getUserData = async (userId: string) => {
   }
 };
 
-// ==========================================
-// 2. Profile Photo එක Upload කිරීම (Upload Image)
-// ==========================================
+//Profile Photo  Upload  
 export const uploadProfileImage = async (userId: string, uri: string) => {
   try {
-    // A. Image එක Blob (File) එකක් බවට හරවනවා
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    
-    // B. Firebase Storage එකේ තැනක් හදනවා
-    const storage = getStorage();
-    const storageRef = ref(storage, `profilePictures/${userId}`);
-    
-    // C. Upload කරනවා
-    await uploadBytes(storageRef, blob);
-    
-    // D. Upload වුන Link එක (Download URL) ගන්නවා
-    const downloadURL = await getDownloadURL(storageRef);
-    
-    // E. User Profile එක Update කරනවා (URL එක Save කරන්න)
-    await updateUserData(userId, undefined, downloadURL);
-    
-    return downloadURL;
+    const data = new FormData();
+    data.append('file', {
+      uri: uri,
+      type: 'image/jpeg',
+      name: 'profile.jpg',
+    } as any);
+
+    data.append('upload_preset', UPLOAD_PRESET);
+    data.append('cloud_name', CLOUD_NAME);
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+      method: 'post',
+      body: data
+    });
+
+    const result = await res.json();
+
+    if (result.secure_url) {
+      const downloadURL = result.secure_url;
+      // Database Update
+      await updateUserData(userId, undefined, downloadURL);
+      return downloadURL;
+    } else {
+      throw new Error("Cloudinary upload failed");
+    }
+
   } catch (error) {
-    console.error("Error uploading image:", error);
+    console.error("Error uploading image to Cloudinary:", error);
     throw error;
   }
 };
 
-// ==========================================
-// 3. User විස්තර යාවත්කාලීන කිරීම (Update Name/Photo)
-// ==========================================
+//  User details Update 
 export const updateUserData = async (userId: string, name?: string, photoURL?: string) => {
   try {
     const userRef = doc(db, "users", userId);
     const updateData: any = {};
     
-    // නම වෙනස් කරලා නම් විතරක් Add කරන්න
     if (name) updateData.name = name;
-    
-    // Photo එක වෙනස් කරලා නම් විතරක් Add කරන්න
     if (photoURL) updateData.photoURL = photoURL;
 
-    // A. Firestore Database එක Update කරනවා
-    await updateDoc(userRef, updateData);
+    await setDoc(userRef, updateData, { merge: true });
 
-    // B. Firebase Auth Profile එකත් Update කරනවා (App එක පුරාම පෙන්නන්න)
     if (auth.currentUser) {
       await updateProfile(auth.currentUser, {
         displayName: name || auth.currentUser.displayName,
@@ -81,23 +81,19 @@ export const updateUserData = async (userId: string, name?: string, photoURL?: s
   }
 };
 
-// ==========================================
-// 4. User ගේ ශරීර විස්තර Save කිරීම (Onboarding Data - NEW ✅)
-// ==========================================
-// මෙය තමයි ඔයාගේ Age, Weight, Height Save කරන්න පාවිච්චි කරන්නේ
+// Save User Stats 
 export const saveUserStats = async (userId: string, data: any) => {
   try {
     const userRef = doc(db, "users", userId);
     
-    // Database එක Update කරනවා
-    await updateDoc(userRef, {
+    await setDoc(userRef, {
       age: data.age,
       weight: data.weight,
       height: data.height,
       gender: data.gender,
-      fitnessLevel: data.level, // fitnessLevel හෝ level ලෙස Save වෙයි
-      isOnboardingComplete: true // Onboarding ඉවරයි කියලා මාර්ක් කරනවා
-    });
+      fitnessLevel: data.level, 
+      isOnboardingComplete: true 
+    }, { merge: true });
 
     return true;
   } catch (error) {

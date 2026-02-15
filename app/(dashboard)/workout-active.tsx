@@ -21,7 +21,6 @@ import { logCompletedWorkout } from '../../services/workoutService';
 
 const { height } = Dimensions.get('window');
 
-// --- Types ---
 interface Step {
   id: string;
   title: string;
@@ -37,7 +36,6 @@ interface Workout {
   steps: Step[];
 }
 
-// --- Data ---
 const WORKOUT_DATA: Record<string, Workout> = {
   '1': {
     image: require('../../assets/images/9.jpg'), 
@@ -116,7 +114,6 @@ export default function WorkoutActiveScreen() {
   const startWorkout = () => {
     setIsPlayerActive(true);
     setCurrentStepIndex(0);
-    // Safety Check: Steps තිබේ නම් පමණක් පළමු පියවර ගන්න
     if (currentWorkout.steps && currentWorkout.steps.length > 0) {
         setTimeLeft(currentWorkout.steps[0].time);
     }
@@ -132,7 +129,6 @@ export default function WorkoutActiveScreen() {
   };
 
   const handleNextStep = async () => {
-    // Safety Check
     if (!currentWorkout.steps || currentWorkout.steps.length === 0) return;
 
     if (currentStepIndex < currentWorkout.steps.length - 1) {
@@ -140,7 +136,6 @@ export default function WorkoutActiveScreen() {
       setCurrentStepIndex(nextIndex);
       setTimeLeft(currentWorkout.steps[nextIndex].time);
     } else {
-      // --- WORKOUT FINISHED ---
       setIsPaused(true);
 
       if (auth.currentUser) {
@@ -178,9 +173,7 @@ export default function WorkoutActiveScreen() {
     return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  // --- Render Player View ---
   if (isPlayerActive) {
-    // Safety Check: Step එකක් නැත්නම් Loading පෙන්නන්න (Crash නොවී)
     const currentStep = currentWorkout.steps ? currentWorkout.steps[currentStepIndex] : null;
     const nextStep = currentWorkout.steps ? currentWorkout.steps[currentStepIndex + 1] : null;
 

@@ -15,7 +15,7 @@ import { getAuth } from 'firebase/auth';
 
 const { width } = Dimensions.get('window');
 
-// Mock Data (Workout List)
+// Workout List
 const POPULAR_WORKOUTS = [
   { 
     id: '1', 
@@ -48,16 +48,13 @@ export default function HomeScreen() {
   const user = auth.currentUser;
   const displayName = user?.displayName || "User";
 
-  // --- WEEKLY GOAL & STATS DATA ---
   const weeklyTarget = 5; 
-  const completedDays = 3; // <-- මෙතන අගය වෙනස් වුනාම, යට තියෙන Stats ඔක්කොම මාරු වෙනවා
+  const completedDays = 3; 
   const progressPercent = (completedDays / weeklyTarget) * 100;
 
-  // 👇 DYNAMIC CALCULATIONS (වෙනස් වන කොටස)
-  // එක දවසකට කැලරි 320ක් සහ විනාඩි 45ක් වැය වෙනවා කියලා උපකල්පනය කරමු
   const totalCalories = completedDays * 320; 
   const totalMinutes = completedDays * 45;
-  const avgHeartRate = completedDays > 0 ? 125 : 0; // ව්‍යායාම කරලා නම් විතරක් Heart Rate පෙන්වන්න
+  const avgHeartRate = completedDays > 0 ? 125 : 0; 
 
   const weekDays = [
     { label: 'M', done: true },
@@ -75,7 +72,6 @@ export default function HomeScreen() {
       
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* 1. HEADER SECTION */}
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Good Morning 👋</Text>
@@ -89,13 +85,11 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* 2. STATS BAR (Dynamic Values) */}
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
             <View style={styles.iconCircle}>
                 <Ionicons name="flame" size={20} color="#CCFF00" />
             </View>
-            {/* මෙතන වෙනස් කළා: totalCalories */}
             <Text style={styles.statValue}>{totalCalories}</Text>
             <Text style={styles.statLabel}>Kcal</Text>
           </View>
@@ -104,7 +98,6 @@ export default function HomeScreen() {
             <View style={styles.iconCircle}>
                 <Ionicons name="time" size={20} color="#CCFF00" />
             </View>
-            {/* මෙතන වෙනස් කළා: totalMinutes */}
             <Text style={styles.statValue}>{totalMinutes}</Text>
             <Text style={styles.statLabel}>Mins</Text>
           </View>
@@ -113,25 +106,21 @@ export default function HomeScreen() {
             <View style={styles.iconCircle}>
                 <Ionicons name="heart" size={20} color="#CCFF00" />
             </View>
-            {/* මෙතන වෙනස් කළා: avgHeartRate */}
             <Text style={styles.statValue}>{avgHeartRate}</Text>
             <Text style={styles.statLabel}>Bpm</Text>
           </View>
         </View>
 
-        {/* --- WEEKLY GOAL PROGRESS --- */}
         <View style={styles.goalCard}>
           <View style={styles.goalHeader}>
             <Text style={styles.goalTitle}>Weekly Goal</Text>
             <Text style={styles.goalSubtitle}>{completedDays} of {weeklyTarget} Workouts</Text>
           </View>
 
-          {/* Progress Bar */}
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
           </View>
 
-          {/* Days Indicator */}
           <View style={styles.daysContainer}>
             {weekDays.map((day, index) => (
               <View key={index} style={styles.dayWrapper}>
@@ -149,7 +138,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* 3. HERO SECTION */}
         <View style={styles.heroCard}>
           <View style={styles.heroTextContainer}>
             <Text style={styles.heroTitle}>Ready to {'\n'}Workout?</Text>
@@ -168,7 +156,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* 4. POPULAR WORKOUTS LIST */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Popular Workouts</Text>
           <TouchableOpacity>
@@ -215,7 +202,6 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   
-  // Header Styles
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -240,7 +226,6 @@ const styles = StyleSheet.create({
     borderColor: '#CCFF00',
   },
 
-  // Stats Styles
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -279,7 +264,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  // Weekly Goal Styles
   goalCard: {
     backgroundColor: '#1C1C1E',
     borderRadius: 20,
@@ -344,7 +328,6 @@ const styles = StyleSheet.create({
     color: '#000', 
   },
 
-  // Hero Section Styles
   heroCard: {
     backgroundColor: '#CCFF00', 
     borderRadius: 25,
@@ -389,7 +372,6 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-10deg' }]
   },
 
-  // Popular Workouts Styles
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

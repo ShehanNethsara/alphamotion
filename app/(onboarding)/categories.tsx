@@ -103,7 +103,6 @@ const styles = StyleSheet.create({
     marginBottom: 10 
   },
   
-  // --- CARD STYLES ---
   card: { 
     width: CARD_WIDTH,
     backgroundColor: '#1C1C1E', 
@@ -127,7 +126,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#2C2C2E',
   },
 
-  // Image 
   imageContainer: {
     width: '100%',
     height: 100,
@@ -160,7 +158,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // --- BUTTON STYLES ---
   button: { 
     backgroundColor: '#CCFF00', 
     padding: 18, 

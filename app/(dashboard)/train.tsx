@@ -97,14 +97,14 @@ export default function TrainScreen() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchText, setSearchText] = useState('');
 
-  // 👇 DAILY CHALLENGE LOGIC 
+  //  DAILY CHALLENGE LOGIC 
   const dailyChallenge = useMemo(() => {
     const today = new Date().getDate();
     const index = today % WORKOUT_PLANS.length;
     return WORKOUT_PLANS[index];
   }, []);
 
-  // 👇 Search & Filter Logic
+  //  Search & Filter Logic
   const filteredPlans = WORKOUT_PLANS.filter((plan) => {
     const matchesSearch = plan.title.toLowerCase().includes(searchText.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || plan.category === selectedCategory;
@@ -115,7 +115,6 @@ export default function TrainScreen() {
     <View style={styles.container}>
       <StatusBar style="light" />
 
-      {/* 1. Header & Search Bar */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Find a Workout</Text>
         
@@ -138,7 +137,6 @@ export default function TrainScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* 2. Categories */}
         <View style={styles.categoriesContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {CATEGORIES.map((cat, index) => (
@@ -161,7 +159,6 @@ export default function TrainScreen() {
           </ScrollView>
         </View>
 
-         {/* 3. Daily Challenge (Dynamic)  */}
         {searchText === '' && selectedCategory === 'All' && (
           <View>
             <Text style={styles.sectionTitle}>Daily Challenge</Text>
@@ -197,7 +194,6 @@ export default function TrainScreen() {
           </View>
         )}
 
-        {/* 4. Filtered Workout List */}
         <Text style={styles.sectionTitle}>
           {searchText ? 'Search Results' : 'Explore Plans'}
         </Text>
@@ -284,10 +280,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   scrollContent: {
-    paddingBottom: 100, // Bottom Tab එකට ඉඩ
+    paddingBottom: 100, 
   },
   
-  // Categories
   categoriesContainer: {
     marginBottom: 25,
     paddingLeft: 20,
@@ -314,7 +309,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // Titles
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -323,7 +317,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  // Featured Card
   featuredCard: {
     marginHorizontal: 20,
     height: 200,
@@ -377,7 +370,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // Plan Cards
   planCard: {
     flexDirection: 'row',
     backgroundColor: COLORS.card,
@@ -426,7 +418,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   
-  // Empty State
   emptyState: {
     alignItems: 'center',
     marginTop: 50,

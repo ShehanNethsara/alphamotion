@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   text: {
-    color: COLORS.background, // කළු පාට අකුරු
+    color: COLORS.background, 
     fontSize: 18,
     fontWeight: 'bold',
   },

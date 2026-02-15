@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getAuth } from 'firebase/auth'; // Auth ගන්න
-import { saveUserStats } from '../../services/userService'; // අපි අලුතින් හදපු function එක
+import { getAuth } from 'firebase/auth'; 
+import { saveUserStats } from '../../services/userService'; 
 
 export default function UserInfoScreen() {
   const router = useRouter();
@@ -24,16 +24,14 @@ export default function UserInfoScreen() {
   const [age, setAge] = useState('21');
   const [weight, setWeight] = useState('60');
   const [height, setHeight] = useState('170');
-  const [loading, setLoading] = useState(false); // Loading State
-
+  const [loading, setLoading] = useState(false); 
   const handleContinue = async () => {
     if (!user) return;
 
-    // 1. Loading පටන් ගන්නවා
     setLoading(true);
 
     try {
-      // 2. Data ටික Firebase එකට Save කරනවා
+      // 2.sv Data  Firebase 
       await saveUserStats(user.uid, {
         gender,
         age,
@@ -42,13 +40,11 @@ export default function UserInfoScreen() {
         level
       });
 
-      // 3. ඊළඟ පිටුවට යනවා
       router.push('/(onboarding)/categories');
 
     } catch (error) {
       Alert.alert("Error", "Failed to save data. Please try again.");
     } finally {
-      // 4. Loading නවත්තනවා
       setLoading(false);
     }
   };
@@ -56,7 +52,6 @@ export default function UserInfoScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       
-      {/* Progress Bar */}
       <View style={styles.progressBar}>
         <View style={[styles.progressItem, { backgroundColor: '#CCFF00' }]} />
         <View style={[styles.progressItem, { backgroundColor: '#CCFF00' }]} />
@@ -66,7 +61,6 @@ export default function UserInfoScreen() {
 
       <Text style={styles.headerTitle}>Tell us about you</Text>
 
-      {/* Gender */}
       <Text style={styles.label}>What is your gender?</Text>
       <View style={styles.row}>
         {['Male', 'Female'].map((g) => (
@@ -81,7 +75,6 @@ export default function UserInfoScreen() {
         ))}
       </View>
 
-      {/* Age */}
       <Text style={styles.label}>Your Age</Text>
       <TextInput 
         style={styles.input} 
@@ -91,7 +84,6 @@ export default function UserInfoScreen() {
         textAlign="center"
       />
 
-      {/* Weight */}
       <Text style={styles.label}>Current Weight (kg)</Text>
       <TextInput 
         style={styles.input} 
@@ -101,7 +93,6 @@ export default function UserInfoScreen() {
         textAlign="center"
       />
 
-      {/* Height */}
       <Text style={styles.label}>Height (cm)</Text>
       <TextInput 
         style={styles.input} 
@@ -111,7 +102,6 @@ export default function UserInfoScreen() {
         textAlign="center"
       />
 
-      {/* Fitness Level */}
       <Text style={styles.label}>Fitness Level</Text>
       <View style={styles.levelContainer}>
         {['Beginner', 'Intermediate', 'Advanced'].map((l) => (
@@ -126,11 +116,10 @@ export default function UserInfoScreen() {
         ))}
       </View>
 
-      {/* Continue Button with Loading */}
       <TouchableOpacity 
         style={styles.button}
         onPress={handleContinue}
-        disabled={loading} // Loading වෙද්දී ඔබන්න බෑ
+        disabled={loading} 
       >
         {loading ? (
           <ActivityIndicator color="#000" />

@@ -35,13 +35,13 @@ export default function ProfileScreen() {
       if (user) {
         setEmail(user.email || '');
         setName(user.displayName || 'User');
-        setPhotoURL(user.photoURL); // Auth එකේ තියෙන Photo එක ගන්නවා
+        setPhotoURL(user.photoURL); 
         
         try {
           const dbData = await getUserData(user.uid);
           if (dbData) {
             if (dbData.name) setName(dbData.name);
-            if (dbData.photoURL) setPhotoURL(dbData.photoURL); // Database එකෙනුත් ගන්නවා
+            if (dbData.photoURL) setPhotoURL(dbData.photoURL); 
           }
         } catch (error) {
           console.log("Error loading data", error);
@@ -52,9 +52,7 @@ export default function ProfileScreen() {
     loadProfile();
   }, []);
 
-  // Photo තෝරාගැනීම සහ Upload කිරීම
   const pickImage = async () => {
-    // Permission ඉල්ලනවා
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
@@ -65,23 +63,22 @@ export default function ProfileScreen() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.5, // Size එක අඩු කරන්න
+      quality: 0.5, 
     });
 
     if (!result.canceled && user) {
       const uri = result.assets[0].uri;
-      setPhotoURL(uri); // UI එකේ ඉක්මනට පෙන්නන්න
-      setUploading(true);
+      setUploading(true); 
       
       try {
         const downloadURL = await uploadProfileImage(user.uid, uri);
         setPhotoURL(downloadURL);
         Alert.alert("Success", "Profile picture updated! 📸");
       } catch (error) {
+        console.log(error);
         Alert.alert("Error", "Failed to upload image.");
-        // Error ආවොත් පරණ එකම තියාගන්න (Optional)
       } finally {
-        setUploading(false);
+        setUploading(false); 
       }
     }
   };
@@ -119,7 +116,6 @@ export default function ProfileScreen() {
         
         <View style={styles.profileSection}>
           <View style={styles.imageContainer}>
-            {/* Loading වෙනකොට Spinner එකක් පෙන්නනවා */}
             {uploading && (
               <View style={styles.uploadingOverlay}>
                  <ActivityIndicator color={COLORS.primary} />
@@ -131,7 +127,6 @@ export default function ProfileScreen() {
               style={styles.profileImage} 
             />
             
-            {/* Camera Icon Button */}
             <TouchableOpacity style={styles.editBadge} onPress={pickImage} disabled={uploading}>
               <Ionicons name="camera" size={16} color="#000" />
             </TouchableOpacity>
@@ -145,8 +140,6 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ... (අනිත් කොටස් පරණ විදිහමයි) ... */}
-        {/* Stats Row */}
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
             <Text style={styles.statValue}>60 kg</Text>
@@ -164,7 +157,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Settings Section */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>General</Text>
           <TouchableOpacity style={styles.optionRow}>
@@ -195,7 +187,6 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Other Section */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>Other</Text>
           <TouchableOpacity style={styles.optionRow}>

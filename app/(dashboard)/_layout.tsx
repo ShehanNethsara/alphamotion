@@ -2,14 +2,7 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Platform } from 'react-native';
-
-const COLORS = {
-  primary: '#CCFF00', // Neon Yellow
-  background: '#000000',
-  card: '#1C1C1E',
-  text: '#FFFFFF',
-  gray: '#666666',
-};
+import COLORS from '../../constants/Colors';
 
 export default function DashboardLayout() {
   return (
@@ -17,7 +10,7 @@ export default function DashboardLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#000', // Tab Bar එක සම්පූර්ණ කළු
+          backgroundColor: '#000', 
           borderTopWidth: 0,
           height: Platform.OS === 'ios' ? 85 : 65,
           paddingBottom: Platform.OS === 'ios' ? 30 : 10,
@@ -33,7 +26,6 @@ export default function DashboardLayout() {
         },
       }}
     >
-      {/* 1. Home Tab */}
       <Tabs.Screen
         name="home"
         options={{
@@ -44,9 +36,8 @@ export default function DashboardLayout() {
         }}
       />
 
-      {/* 2. Train Tab (Flame Icon) */}
       <Tabs.Screen
-        name="train" // මේ ෆයිල් එක හදන්න වෙයි (දැනට තියෙන history.tsx එක rename කරන්න පුළුවන්)
+        name="train" 
         options={{
           tabBarLabel: 'Train',
           tabBarIcon: ({ color, focused }) => (
@@ -55,11 +46,10 @@ export default function DashboardLayout() {
         }}
       />
 
-      {/* 3. Center Button (Yellow Circle) */}
       <Tabs.Screen
         name="add"
         options={{
-          tabBarLabel: '', // නමක් නෑ
+          tabBarLabel: '',
           tabBarIcon: ({ focused }) => (
             <View
               style={{
@@ -69,9 +59,9 @@ export default function DashboardLayout() {
                 borderRadius: 30,
                 justifyContent: 'center',
                 alignItems: 'center',
-                marginBottom: 25, // ටිකක් උඩට ගන්නවා
+                marginBottom: 25, 
                 borderWidth: 4,
-                borderColor: '#000', // වටේට කළු ඉරක්
+                borderColor: '#000', 
               }}
             >
               <Ionicons name="document-text" size={28} color="black" />
@@ -80,9 +70,8 @@ export default function DashboardLayout() {
         }}
       />
 
-      {/* 4. Report Tab */}
       <Tabs.Screen
-        name="report" // මේ ෆයිල් එකත් හදන්න වෙයි
+        name="report" 
         options={{
           tabBarLabel: 'Report',
           tabBarIcon: ({ color, focused }) => (
@@ -91,9 +80,8 @@ export default function DashboardLayout() {
         }}
       />
 
-      {/* 5. Setting Tab */}
       <Tabs.Screen
-        name="profile" // Profile එක Setting විදිහට පාවිච්චි කරමු
+        name="profile" 
         options={{
           tabBarLabel: 'Setting',
           tabBarIcon: ({ color, focused }) => (
@@ -102,9 +90,7 @@ export default function DashboardLayout() {
         }}
       />
       
-      {/* Hidden Screens */}
       <Tabs.Screen name="workout-active" options={{ href: null }} />
-      {/* ඔයාගේ පරණ file names තියෙනවා නම් ඒවා මේකට map කරන්න (උදා: history -> report) */}
     </Tabs>
   );
 }

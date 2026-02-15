@@ -21,7 +21,6 @@ import {
   Workout
 } from '../../services/workoutService';
 
-// 👇 අලුත් Components
 import InputField from '../../components/InputField';
 import PrimaryButton from '../../components/PrimaryButton';
 import WorkoutCard from '../../components/WorkoutCard';
@@ -137,7 +136,6 @@ export default function AddWorkoutScreen() {
         <Text style={styles.headerTitle}>Custom Workouts</Text>
       </View>
 
-      {/* Form using Components */}
       <View style={styles.formContainer}>
         <InputField 
           label="Workout Name" 
@@ -170,7 +168,6 @@ export default function AddWorkoutScreen() {
         <PrimaryButton 
           title={editingId ? "Update Workout" : "Add Workout"} 
           onPress={handleSave}
-          // Edit කරනකොට පාට වෙනස් වෙන්න ඕන නිසා style එකක් දාමු
           style={editingId ? { backgroundColor: '#FFA500' } : {}}
         />
 
@@ -190,7 +187,6 @@ export default function AddWorkoutScreen() {
           data={workouts}
           keyExtractor={(item) => item.id || Math.random().toString()}
           contentContainerStyle={{ paddingBottom: 100 }}
-          // 👇 WorkoutCard එක පාවිච්චි කළා
           renderItem={({ item }) => (
             <WorkoutCard 
               title={item.title}

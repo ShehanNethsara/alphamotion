@@ -16,7 +16,6 @@ import { getWorkoutStats, WorkoutLog } from '../../services/workoutService';
 export default function ReportScreen() {
   const auth = getAuth();
   
-  // State එක වෙනස් කළා Today & Total දෙකම තියාගන්න
   const [stats, setStats] = useState({
     today: { workouts: 0, minutes: 0, calories: 0 },
     total: { workouts: 0, minutes: 0, calories: 0 },
@@ -27,7 +26,6 @@ export default function ReportScreen() {
 
   const loadStats = async () => {
     if (!auth.currentUser) return;
-    // setLoading(true); // Refresh වෙනකොට කැරකෙන එක ඕන නම් Uncomment කරන්න
     const data = await getWorkoutStats(auth.currentUser.uid);
     setStats(data);
     setLoading(false);
@@ -65,11 +63,9 @@ export default function ReportScreen() {
           />
         }
       >
-        {/* --- Today's Stats Cards --- */}
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <Ionicons name="trophy" size={28} color="#FFD700" />
-            {/* මෙතන දැම්මේ අද දවසේ ගණන */}
             <Text style={styles.statNumber}>{stats.today.workouts}</Text>
             <Text style={styles.statLabel}>Workouts</Text>
           </View>
@@ -87,7 +83,6 @@ export default function ReportScreen() {
           </View>
         </View>
 
-        {/* --- History List --- */}
         <Text style={styles.sectionTitle}>Recent History</Text>
         
         {stats.history.length === 0 ? (

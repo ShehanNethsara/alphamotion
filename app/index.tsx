@@ -14,19 +14,16 @@ export default function WelcomeScreen() {
     <View style={styles.container}>
       <StatusBar style="light" />
 
-      {/* 1. Circle & Image Container */}
-      {/* Image එක දැන් තියෙන්නේ Circle එක ඇතුලේ */}
       <View style={styles.circleContainer}>
         <View style={styles.circle}>
           <Image
             source={require('../assets/images/1.jpg')}
             style={styles.image}
-            resizeMode="cover" // රවුම සම්පූර්ණයෙන්ම වැහෙන්න 'cover' දැම්මා
+            resizeMode="cover" 
           />
         </View>
       </View>
 
-      {/* 2. Text & Button Content */}
       <View style={styles.contentContainer}>
         <Text style={styles.title}>
           Transform Your Body, {'\n'}
@@ -37,11 +34,10 @@ export default function WelcomeScreen() {
           Every workout brings you closer to a stronger, healthier version of yourself.
         </Text>
 
-        {/* Get Started Button */}
         <TouchableOpacity
           style={styles.button}
           activeOpacity={0.8}
-          onPress={() => router.push('/login')} // Login එකට යවන්න
+          onPress={() => router.push('/login')} 
         >
           <Text style={styles.buttonText}>Get Started</Text>
           <View style={styles.iconContainer}>
@@ -61,10 +57,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   
-  // Circle එක සහ Image එක තියෙන තැන පාලනය කිරීම
   circleContainer: {
     position: 'absolute',
-    top: height * 0.12, // උඩ සිට පහළට ඇති දුර
+    top: height * 0.12,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
@@ -72,24 +67,22 @@ const styles = StyleSheet.create({
 
   // රවුම හැඩය
   circle: {
-    width: width * 0.85, // රවුමේ ප්‍රමාණය
+    width: width * 0.85, 
     height: width * 0.85,
-    borderRadius: (width * 0.85) / 2, // හරියටම රවුමක් වෙන්න නම් width එකෙන් බාගයක්
+    borderRadius: (width * 0.85) / 2, 
     backgroundColor: '#CCFF00',
-    overflow: 'hidden', // වැදගත්ම දේ: මේකෙන් තමයි Image එක රවුම ඇතුලේ කොටු කරන්නේ
+    overflow: 'hidden', 
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2, // ඕන නම් පොඩි border එකක්
+    borderWidth: 2, 
     borderColor: '#CCFF00',
   },
 
-  // පින්තූරය
   image: {
     width: '100%',
     height: '100%',
   },
 
-  // පහළ තියෙන Text සහ Button
   contentContainer: {
     width: '100%',
     paddingHorizontal: 25,
@@ -157,4 +150,3 @@ const Index = () => {
   }
 }
 
-// export default Index
