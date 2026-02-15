@@ -70,6 +70,6 @@ Follow these steps to set up the project locally.
 
 **Shehan Nethsara**
 *Student at Shehan Nethsara
- GitHub: [Your GitHub Link]
+ GitHub: (https://github.com/ShehanNethsara/alphamotion.git)
 
 Made with ❤️ using **React Native**.
