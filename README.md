@@ -1,50 +1,75 @@
-# Welcome to your Expo app 👋
+# 🏋️ AlphaMotion - Fitness & Workout App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+AlphaMotion is a comprehensive mobile fitness application designed to help users track their health statistics, manage workout plans, and maintain a healthy lifestyle. Built with **React Native (Expo)**, it offers a seamless cross-platform experience on Android and iOS.
 
-## Get started
 
-1. Install dependencies
 
-   ```bash
-   npm install
-   ```
+## 📱 Features
 
-2. Start the app
+* **User Authentication:** Secure Login and Registration using Firebase Auth.
+* **Onboarding System:** Collects user data (Age, Weight, Height, Gender) to personalize the experience.
+* **Dashboard:** View active workouts and daily progress.
+* **Profile Management:** Update user details and upload profile pictures (Powered by **Cloudinary**).
+* **Workout Plans:** Categorized workout routines for different fitness levels (Beginner, Intermediate, Advanced).
+* **BMI & Stats:** Tracks user body metrics stored in Firestore.
 
-   ```bash
-   npx expo start
-   ```
 
-In the output, you'll find options to open the app in a
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🛠️ Tech Stack
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+* **Frontend:** React Native, Expo, TypeScript
+* **Backend:** Firebase (Authentication, Firestore Database)
+* **Storage:** Cloudinary (Image Optimization & Storage)
+* **Navigation:** Expo Router (File-based routing)
+* **Styling:** NativeWind (Tailwind CSS)
 
-## Get a fresh project
 
-When you're ready, run:
 
-```bash
-npm run reset-project
-```
+## 📂 Project Structure
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+The project follows a modular architecture for better scalability.
 
-## Learn more
+AlphaMotion/
+├── app/                  # Screens & Navigation (Expo Router)
+│   ├── (auth)/           # Login, Register Screens
+│   ├── (dashboard)/      # Home, Profile, Workouts
+│   └── (onboarding)/     # User Info Collection
+├── components/           # Reusable UI Components (Buttons, Cards)
+├── context/              # Global State (Auth Context)
+├── services/             # API Services (Firebase, Cloudinary)
+├── config/               # Configuration Files (Firebase Keys)
+└── assets/               # Images and Icons
 
-To learn more about developing your project with Expo, look at the following resources:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 🚀 Getting Started
 
-## Join the community
+Follow these steps to set up the project locally.
 
-Join our community of developers creating universal apps.
+### Prerequisites
+* Node.js (v18 or higher)
+* Expo CLI installed globally (`npm install -g expo-cli`)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Installation
+
+
+  **Install dependencies**
+    npm install
+    
+
+  **Configure Environment**
+    * Add your Firebase configuration in `config/firebase.ts`.
+    * Add your Cloudinary credentials in `services/userService.ts`.
+
+  **Run the App**
+    npx expo start
+  
+
+
+
+ 👤 Author
+
+**Shehan Nethsara**
+*Student at Shehan Nethsara
+ GitHub: [Your GitHub Link]
+
+Made with ❤️ using **React Native**.
